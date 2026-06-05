@@ -1,3 +1,5 @@
+
+
 type EntityId = string
 type Pos = [number, number, number]
 type PlayerId = LifeformId
@@ -24,6 +26,7 @@ interface PlayerAttemptDamageOtherPlayerOpts {
 	// The damaging playerDbId. If null, will default to the dbId of \`eId\`
 	damagerDbId?: PNull<PlayerId>
 }
+type WorldGamemode = "survival" | "creative" | "peaceful" | "survivaladventure" | "peacefuladventure" | "spectator"
 type HittingSoundOverride = { sound: string; volume: number; pitch: number }
 type CustomTextStyling = (string | EntityName | TranslatedText | StyledIcon | StyledText)[]
 type EntityName = {
@@ -433,6 +436,8 @@ type MeshParticleSystemOpts = ParticleSystemOpts &
 		dir1?: number[]
 		dir2?: number[]
 	}
+
+type MeshParticleSystemUpdates = MeshParticleSystemOpts
 type CosmeticType = (_TypeOf["cosmeticTypes"])[number]
 type CosmeticName = string
 type MobHerdId = number
@@ -637,6 +642,7 @@ type MeshEntityVehicleOpts = {
 	itemDrop?: string
 }
 type PlayerPhysicsStateData = { type: PhysicsType; tier: number }
+type PlayerPhysicsState<T extends PhysicsType> = Omit<PlayerPhysicsStateData, "type"> & { type: T }
 type QTEType = keyof QTEDefinitions
 type QTEClientParameters<T extends QTEType = QTEType> = {
 	type: T
