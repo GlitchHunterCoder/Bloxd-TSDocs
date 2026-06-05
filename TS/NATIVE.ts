@@ -1,8 +1,14 @@
+
+
 declare var Map: MapConstructor;
 
 declare var Set: SetConstructor;
 
+
+
 declare var Proxy: ProxyConstructor;
+
+
 
 declare type PropertyKey = string | number | symbol;
 
