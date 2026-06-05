@@ -194,6 +194,13 @@ declare var onPlayerAltAction: (playerId: PlayerId, x: number, y: number, z: num
 declare var onPlayerClick: (playerId: PlayerId, wasAltClick: boolean, x: number, y: number, z: number, block: BlockName, targetEId: EntityId | null) => void
 
 /**
+ * Called when a player releases a click (mouse-up on desktop, touch-end on mobile).
+ * Fires for both primary and secondary click releases.
+ * Keep in mind wasAltClick will always be false for touchscreen players.
+ */
+declare var onPlayerClickUp: (playerId: PlayerId, wasAltClick: boolean, x: number, y: number, z: number, block: BlockName, targetEId: EntityId | null) => void
+
+/**
  * Called when a client option is updated
  * @param playerId - The id of the player whose option was updated
  * @param option - The option that was updated
@@ -457,6 +464,16 @@ declare var onPlayerFinishChargingItem: (playerId: PlayerId, used: boolean, item
 
 
 declare var onPlayerFinishQTE: (playerId: PlayerId, qteId: QTERequestId, result: boolean) => void
+
+/**
+ * Called when a player opens or closes the shop menu
+ * @param playerId - The id of the player whose shop menu changed
+ * @param isOpen - Whether the shop menu is now open
+ */
+declare var onPlayerToggledShopMenu: (playerId: PlayerId, isOpen: boolean) => void
+
+/** Called after a player plays an emote from the emote wheel. */
+declare var onPlayerPlayedEmote: (playerId: PlayerId, emoteId: string) => void
 
 /**
  * Called after a player successfully buys a shop item
