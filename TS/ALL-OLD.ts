@@ -1,31 +1,31 @@
 
-/** The ID of the player running the code.
- *
- * Lobby code usually has nobody running it, so this is null.
- */
-declare const myId: string | null
-/** The position of the code block or press to code board */
-declare const thisPos: [number, number, number]
-/** The owner of the current custom lobby */
-declare const lobbyOwnerId: string | null
+	/** The ID of the player running the code.
+	 *
+	 * Lobby code usually has nobody running it, so this is null.
+	 */
+	declare const myId: string | null
+	/** The position of the code block or press to code board */
+	declare const thisPos: [number, number, number]
+	/** The owner of the current custom lobby */
+	declare const lobbyOwnerId: string | null
 
-interface Console {
-	/** Log a message to chat. */
-	log(message: string): void
-}
-declare const console: Console
+	interface Console {
+		/** Log a message to chat. */
+		log(message: string): void
+	}
+	declare const console: Console
 
-interface GameApi {
-/** The ID of the player running the code.
- *
- * Lobby code usually has nobody running it, so this is null.
- */
-myId: string | null
-/** The position of the code block or press to code board */
-thisPos: [number, number, number]
-/** The owner of the current custom lobby */
-lobbyOwnerId: string | null
-/**
+	interface GameApi {
+		/** The ID of the player running the code.
+		 *
+		 * Lobby code usually has nobody running it, so this is null.
+		 */
+		myId: string | null
+		/** The position of the code block or press to code board */
+		thisPos: [number, number, number]
+		/** The owner of the current custom lobby */
+		lobbyOwnerId: string | null
+		/**
  * Get position of a player / entity.
  * @param entityId
  */
@@ -38,6 +38,18 @@ getPosition(entityId: EntityId): Pos
  * @param z
  */
 setPosition(entityId: EntityId, x: number | number[], y?: number, z?: number): void
+/**
+ * Get the scale of a lifeform.
+ * @param lifeformId
+ */
+getLifeformScale(lifeformId: LifeformId): number
+/**
+ * Set the visual + physical scale of a lifeform. A scale of 1 is the default size,
+ *
+ * @param lifeformId
+ * @param scale Must be a finite positive number.
+ */
+setLifeformScale(lifeformId: LifeformId, scale: number): void
 /**
  * Get all the player ids.
  */
@@ -185,6 +197,12 @@ attemptApplyDamage({
 		isTrueDamage,
 		damagerDbId,
 	}: PlayerAttemptDamageOtherPlayerOpts): boolean
+/**
+ * Create enchantment attributes for an item at a given enchantment level. Same behaviour as if that level of enchant was selected for the item in an enchanting table.
+ * @param itemName
+ * @param enchantmentLevel
+ */
+createEnchantmentAttributesForItem(itemName: ItemName, enchantmentLevel: number): EnchantmentAttributes
 /**
  * Force respawn a player
  * @param playerId
@@ -1856,278 +1874,311 @@ log(message: string): void
 	}
 	/** Game API */
 	declare const api: GameApi;
-
-type EntityId = string
-type Pos = [number, number, number]
-type PlayerId = LifeformId
-type LifeformId = EntityId
-type PNull<T> = T | null
-type PlayerDbId = string
-type LifeformBodyPart = (_TypeOf["lifeformBodyParts"])[number]
+type EntityId = string;
+type Pos = [number, number, number];
+type LifeformId = EntityId;
+type PlayerId = LifeformId;
+type PNull<T> = T | null;
+type PlayerDbId = string;
+type LifeformBodyPart = (_TypeOf["lifeformBodyParts"])[number];
 interface PlayerAttemptDamageOtherPlayerOpts {
-	eId: PlayerId
-	hitEId: PlayerId
-	attemptedDmgAmt: number
-	withItem: string
-	bodyPartHit?: LifeformBodyPart
-	attackDir?: number[]
-	showCritParticles?: boolean
-	reduceVerticalKbVelocity?: boolean
-	horizontalKbMultiplier?: number
-	verticalKbMultiplier?: number
-	broadcastEntityHurt?: boolean
-	attackCooldownSettings?: PNull<{ type: string; cooldownMs: number }>
-	hittingSoundOverride?: HittingSoundOverride
-	ignoreOtherEntitySettingCanAttack?: boolean
-	isTrueDamage?: boolean
-	// The damaging playerDbId. If null, will default to the dbId of \`eId\`
-	damagerDbId?: PNull<PlayerId>
+    eId: PlayerId;
+    hitEId: PlayerId;
+    attemptedDmgAmt: number;
+    withItem: string;
+    bodyPartHit?: LifeformBodyPart;
+    attackDir?: number[];
+    showCritParticles?: boolean;
+    reduceVerticalKbVelocity?: boolean;
+    horizontalKbMultiplier?: number;
+    verticalKbMultiplier?: number;
+    broadcastEntityHurt?: boolean;
+    attackCooldownSettings?: PNull<{
+        type: string;
+        cooldownMs: number;
+    }>;
+    hittingSoundOverride?: HittingSoundOverride;
+    ignoreOtherEntitySettingCanAttack?: boolean;
+    isTrueDamage?: boolean;
+    damagerDbId?: PNull<PlayerId>;
 }
-type WorldGamemode = "survival" | "creative" | "peaceful" | "survivaladventure" | "peacefuladventure" | "spectator"
-type HittingSoundOverride = { sound: string; volume: number; pitch: number }
-type CustomTextStyling = (string | EntityName | TranslatedText | StyledIcon | StyledText)[]
-type EntityName = {
-	entityName: string
-	ranks?: Readonly<Rank[]>
-	style?: {
-		color?: string
-		colour?: string
-	}
-}
-type Rank = (_TypeOf["ranks"])[number]
+type HittingSoundOverride = {
+    sound: string;
+    volume: number;
+    pitch: number;
+};
+type ItemName = string;
+type EnchantmentAttributes = {
+    enchantments: Partial<Record<EnchantmentPerk, number>>;
+    enchantmentTier: EnchantmentTier;
+    id: string;
+};
+type EnchantmentPerk = (_TypeOf["enchantmentPerks"])[number];
+type EnchantmentTier = (_TypeOf["enchantmentTiers"])[number];
+type CustomTextStyling = (string | EntityName | TranslatedText | StyledIcon | StyledText)[];
 type TranslatedText = {
-	translationKey: string
-	params?: Record<string, string | number | boolean | EntityName>
-}
+    translationKey: string;
+    params?: Record<string, string | number | boolean | EntityName>;
+};
+type EntityName = {
+    entityName: string;
+    ranks?: Readonly<Rank[]>;
+    style?: {
+        color?: string;
+        colour?: string;
+    };
+};
+type Rank = (_TypeOf["ranks"])[number];
 type StyledIcon = {
-	icon: string
-	style?: {
-		color?: string
-		colour?: string
-		fontSize?: FontSize
-		opacity?: number
-	}
-}
-type FontSize = string
+    icon: string;
+    style?: {
+        color?: string;
+        colour?: string;
+        fontSize?: FontSize;
+        opacity?: number;
+    };
+};
+type FontSize = string;
 type StyledText = {
-	str: string | EntityName | TranslatedText
-	style?: TextStyle
-	clickableUrl?: string
-}
+    str: string | EntityName | TranslatedText;
+    style?: TextStyle;
+    clickableUrl?: string;
+};
 type TextStyle = {
-	color?: string
-	colour?: string
-	fontWeight?: string
-	fontSize?: FontSize
-	fontStyle?: string
-	opacity?: number
-}
-type ClientOption = keyof ClientOptions
+    color?: string;
+    colour?: string;
+    fontWeight?: string;
+    fontSize?: FontSize;
+    fontStyle?: string;
+    opacity?: number;
+};
+type ClientOption = keyof ClientOptions;
 type EarthSkyBox = {
-	type: "earth"
-	inclination?: number
-	turbidity?: number
-	infiniteDistance?: boolean
-	luminance?: number
-	yCameraOffset?: number
-	azimuth?: number
-	// Not part of sky model by default; heavily tint to a vertex color
-	vertexTint?: [number, number, number]
-}
-type LobbyLeaderboardInfo = Record<
-	string,
-	{
-		displayName?: string | CustomTextStyling
-		hidden?: boolean
-		sortOrder?: "ascending" | "descending" // No value means descending
-		sortPriority?: number
-	}
->
-type ShopCategoryKey = string
-type ShopItemKey = string
+    type: "earth";
+    inclination?: number;
+    turbidity?: number;
+    infiniteDistance?: boolean;
+    luminance?: number;
+    rayleigh?: number;
+    mieCoefficient?: number;
+    mieDirectionalG?: number;
+    distance?: number;
+    sunPosition?: Vec3;
+    useSunPosition?: boolean;
+    xCameraOffset?: number;
+    yCameraOffset?: number;
+    zCameraOffset?: number;
+    up?: Vec3;
+    dithering?: boolean;
+    azimuth?: number;
+    vertexTint?: Vec3;
+};
+type Vec3 = [number, number, number];
+type LobbyLeaderboardInfo = Record<string, {
+    displayName?: string | CustomTextStyling;
+    hidden?: boolean;
+    sortOrder?: "ascending" | "descending";
+    sortPriority?: number;
+}>;
+type ShopCategoryKey = string;
+type ShopItemKey = string;
 type ShopItem = {
-	image: string
-	schematicId?: SchematicId
-	cost?: number
-	currency?: string
-	amount?: number // Display amount shown on the shop tile image (0 and 1 are not displayed)
-	imageColour?: string
-	canBuy?: boolean
-	isSelected?: boolean
-	buyButtonText?: string | CustomTextStyling
-	customTitle?: string | CustomTextStyling
-	description?: string | CustomTextStyling
-	onBoughtMessage?: string | CustomTextStyling
-	redDot?: boolean
-	forceRemoveRedDot?: boolean
-	isRewardedAd?: boolean
-	badge?: { text: string | CustomTextStyling; type: ShopItemBadgeType }
-	userInput?: ShopItemUserInput
-
-	// Not defined on client, must be defined on server
-	boughtCallback?: (
-		playerId: PlayerId,
-		cost: number,
-		currency: string,
-		categoryKey: ShopCategoryKey,
-		itemKey: ShopItemKey,
-		userInput: string,
-		amount: number | undefined,
-	) => void
-	sell?: boolean // Optional, defaults to false. If true, the sign of "cost" is flipped. So a "cost" of -25 would give the player 25 currency AND be displayed as "25" (instead of -25)
-	sortPriority?: number // Descending, bigger number means closer to the top
-	hidden?: boolean
-}
-type ShopItemUserInput =
-	| { type: "text"; placeholderText?: string; wordCharsOnly?: boolean; initialValue?: string } // wordCharsOnly defaults to false. If true, only allows \w character (alphanumeric and _). initialValue always takes precedence as the text input value when set.
-	| { type: "number"; placeholderText?: string; initialValue?: string }
-	| {
-			type: "dropdown"
-			dropdownOptions: readonly (string | { option: string; cost: number })[]
-			shouldResetSelectionOnOptionsChange?: boolean // Defaults to false. If true, the selection will reset to the first option when dropdownOptions changes.
-			initialValue?: string
-	  }
-	| { type: "player"; excludedPlayers?: PlayerId[] } // Defaults to excluding the current player
-	| { type: "color"; initialValue?: string }
-type SchematicId = string
-type ShopItemBadgeType = (_TypeOf["shopItemBadgeTypes"])[number]
+    image: string;
+    schematicId?: SchematicId;
+    cost?: number;
+    currency?: string;
+    amount?: number;
+    imageColour?: string;
+    canBuy?: boolean;
+    isSelected?: boolean;
+    buyButtonText?: string | CustomTextStyling;
+    customTitle?: string | CustomTextStyling;
+    description?: string | CustomTextStyling;
+    onBoughtMessage?: string | CustomTextStyling;
+    redDot?: boolean;
+    forceRemoveRedDot?: boolean;
+    isRewardedAd?: boolean;
+    badge?: {
+        text: string | CustomTextStyling;
+        type: ShopItemBadgeType;
+    };
+    userInput?: ShopItemUserInput;
+    enchant?: {
+        tier: EnchantmentTier;
+        enchantments: Partial<Record<EnchantmentPerk, number>>;
+        enchantmentData?: Record<string, {
+            icon?: string;
+            description?: string;
+        }>;
+    };
+    boughtCallback?: (playerId: PlayerId, cost: number, currency: string, categoryKey: ShopCategoryKey, itemKey: ShopItemKey, userInput: string, amount: number | undefined) => void;
+    sell?: boolean;
+    sortPriority?: number;
+    hidden?: boolean;
+};
+type ShopItemUserInput = {
+    type: "text";
+    placeholderText?: string;
+    wordCharsOnly?: boolean;
+    initialValue?: string;
+} | {
+    type: "number";
+    placeholderText?: string;
+    initialValue?: string;
+} | {
+    type: "dropdown";
+    dropdownOptions: readonly (string | {
+        option: string;
+        cost: number;
+    })[];
+    shouldResetSelectionOnOptionsChange?: boolean;
+    initialValue?: string;
+    autoSubmit?: boolean;
+} | {
+    type: "player";
+    excludedPlayers?: PlayerId[];
+} | {
+    type: "color";
+    initialValue?: string;
+};
+type SchematicId = string;
+type ShopItemBadgeType = (_TypeOf["shopItemBadgeTypes"])[number];
 type ShopCategoryConfig = Partial<{
-	autoSelectCategory: boolean
-	customTitle: string // Supports translation keys and ordinary text
-	redDot: boolean
-	forceRemoveRedDot: boolean
-	sortPriority: number
-	description: string | CustomTextStyling
-}>
-type OtherEntitySetting = keyof OtherEntitySettings
+    autoSelectCategory: boolean;
+    customTitle: string;
+    redDot: boolean;
+    forceRemoveRedDot: boolean;
+    sortPriority: number;
+    description: string | CustomTextStyling;
+}>;
+type OtherEntitySetting = keyof OtherEntitySettings;
 type EntityMeshScalingMap = {
-	[key in EntityNamedNode]?: number[]
-}
-type EntityNamedNode = PlayerMeshNamedNode
-type PlayerMeshNamedNode = (_TypeOf["playerMeshNamedNodes"])[number]
-type LobbyLeaderboardValues = Record<string, string | number | CustomTextStyling>
+    [key in EntityNamedNode]?: number[];
+};
+type EntityNamedNode = PlayerMeshNamedNode;
+type PlayerMeshNamedNode = (_TypeOf["playerMeshNamedNodes"])[number];
+type LobbyLeaderboardValues = Record<string, string | number | CustomTextStyling>;
+type ChatTags = CustomTextStyling[];
 type NameTagInfo = {
-	backgroundColor?: string
-	content?: (CustomTextStyling[number] | RankInfo)[]
-	subtitle?: (CustomTextStyling[number] | RankInfo)[]
-	subtitleBackgroundColor?: string
-}
+    backgroundColor?: string;
+    content?: (CustomTextStyling[number] | RankInfo)[];
+    subtitle?: (CustomTextStyling[number] | RankInfo)[];
+    subtitleBackgroundColor?: string;
+    minLighting?: number;
+};
 type RankInfo = {
-	// Font Awesome icon name
-	icon: string
-	mainRGB: string
-	// Defaults to mainRGB
-	bracketRGB?: string
-	chatTag: {
-		str: string
-		// Defaults to mainRGB
-		strRGB?: string
-	}[]
-	// Defaults to none
-	nameTag: {
-		// Defaults to normal name colour (white)
-		iconRGB?: string
-		// Defaults to none
-		iconShadowRGB?: string
-	}
-	visible: boolean // If false, this rank will not be shown in the player list or in the chat
-}
+    icon: string;
+    mainRGB: string;
+    bracketRGB?: string;
+    chatTag: {
+        str: string;
+        strRGB?: string;
+    }[];
+    nameTag: {
+        iconRGB?: string;
+        iconShadowRGB?: string;
+    };
+    visible: boolean;
+};
+type MultilineTextBox = {
+    content: (CustomTextStyling[number] | RankInfo)[];
+    backgroundColor?: string;
+    animateIn?: boolean;
+};
 type TempParticleSystemOpts = ParticleSystemOpts & {
-	dir1: number[]
-	dir2: number[]
-	pos1: number[]
-	pos2: number[]
-	manualEmitCount: number
-	hideDist: number
-}
+    dir1: number[];
+    dir2: number[];
+    pos1: number[];
+    pos2: number[];
+    manualEmitCount: number;
+    hideDist: number;
+};
 type ParticlePresetOpts = {
 	presetId: ParticlePresetId
 	pos1: number[]
 	pos2: number[]
 }
 type ParticleSystemOpts = {
-	texture: string
-	minLifeTime: number
-	maxLifeTime: number
-	minEmitPower: number
-	maxEmitPower: number
-	minSize: number
-	maxSize: number
-	gravity: number[]
-	velocityGradients: VelocityGradient[]
-	colorGradients: TimeColorGradient[] | RandomColorGradient[]
-	blendMode: ParticleSystemBlendMode
-}
+    texture: string;
+    minLifeTime: number;
+    maxLifeTime: number;
+    minEmitPower: number;
+    maxEmitPower: number;
+    minSize: number;
+    maxSize: number;
+    gravity: number[];
+    velocityGradients: VelocityGradient[];
+    colorGradients: TimeColorGradient[] | RandomColorGradient[];
+    blendMode: ParticleSystemBlendMode;
+};
 type VelocityGradient = {
-	timeFraction: number
-	factor: number
-	factor2: number
-}
+    timeFraction: number;
+    factor: number;
+    factor2: number;
+};
 type TimeColorGradient = {
-	timeFraction: number
-	minColor: [number, number, number, number]
-	maxColor?: [number, number, number, number]
-}
+    timeFraction: number;
+    minColor: [number, number, number, number];
+    maxColor?: [number, number, number, number];
+};
 type RandomColorGradient = {
-	color: [number, number, number]
-}
+    color: [number, number, number];
+};
 type ParticlePresetId = keyof _TypeOf["particlePresets"]
 type AnimationSchema = Readonly<{
-	animationDurationMs: number
-	loop?: LoopModeSchema
-	nodeAnimations?: NodeSkeletonAnimationSchema
-}>
+    animationDurationMs: number;
+    loop?: LoopModeSchema;
+    nodeAnimations?: NodeSkeletonAnimationSchema;
+}>;
 type BlockbenchAnimationSchema = Readonly<{
-	animation_length: number // The duration of the animation in seconds.
-	loop?: BlockbenchLoopModeSchema
-	bones?: BlockbenchBonesAnimationSchema
-}>
-type LoopModeSchema = boolean | "hold-on-last-frame"
-type AnimationTimelineSchema = readonly KeyframeSchema[]
+    animation_length: number;
+    loop?: BlockbenchLoopModeSchema;
+    bones?: BlockbenchBonesAnimationSchema;
+}>;
+type LoopModeSchema = boolean | "hold-on-last-frame";
+type AnimationTimelineSchema = readonly KeyframeSchema[];
 type KeyframeSchema = Readonly<{
-	timeFraction: number
-	rotation?: LerpPointSchema // Rotations are assumed to be in radians.
-}>
-type LerpPointSchema =
-	| Point
-	| Readonly<{
-			lerpMode?: LerpModeSchema
-			point: Point
-	  }>
-	| Readonly<{
-			lerpMode?: LerpModeSchema
-			pre: Point // When lerping towards a point, we lerp towards its pre.
-			post: Point // When lerping away from a point, we lerp away from its post.
-	  }>
-type Point = Readonly<Vec3>
-type LerpModeSchema = "linear" | "catmull-rom-spline"
-type Vec3 = [number, number, number]
-type BlockbenchLoopModeSchema = boolean | "hold_on_last_frame"
-type BlockbenchAnimationTimelineSchema = Point | Readonly<Record<TimestampString, BlockbenchAnimationFrameSchema>>
-type TimestampString = string
-type BlockbenchAnimationFrameSchema =
-	| Point
-	| Readonly<{
-			lerp_mode?: BlockbenchLerpModeSchema
-			pre?: Point // When lerping towards a point, we lerp towards its pre.
-			post: Point // When lerping away from a point, we lerp away from its post.
-	  }>
-type BlockbenchLerpModeSchema = "linear" | "catmullrom"
-type NodeSkeletonAnimationSchema = Readonly<Record<NodeName, NodeAnimationSchema>>
-type NodeName = string
+    timeFraction: number;
+    rotation?: LerpPointSchema;
+    position?: LerpPointSchema;
+}>;
+type LerpPointSchema = Point | Readonly<{
+    lerpMode?: LerpModeSchema;
+    point: Point;
+}> | Readonly<{
+    lerpMode?: LerpModeSchema;
+    pre: Point;
+    post: Point;
+}>;
+type Point = Readonly<Vec3>;
+type LerpModeSchema = "linear" | "catmull-rom-spline";
+type BlockbenchLoopModeSchema = boolean | "hold_on_last_frame";
+type BlockbenchAnimationTimelineSchema = Point | Readonly<Record<TimestampString, BlockbenchAnimationFrameSchema>>;
+type TimestampString = string;
+type BlockbenchAnimationFrameSchema = Point | Readonly<{
+    lerp_mode?: BlockbenchLerpModeSchema;
+    pre?: Point;
+    post: Point;
+}>;
+type BlockbenchLerpModeSchema = "linear" | "catmullrom";
+type NodeSkeletonAnimationSchema = Readonly<Record<NodeName, NodeAnimationSchema>>;
+type NodeName = string;
 type NodeAnimationSchema = Readonly<{
-	timeline: AnimationTimelineSchema
-}>
-type BlockbenchBonesAnimationSchema = Readonly<Record<NodeName, BlockbenchBoneAnimationSchema>>
+    timeline: AnimationTimelineSchema;
+}>;
+type BlockbenchBonesAnimationSchema = Readonly<Record<NodeName, BlockbenchBoneAnimationSchema>>;
 type BlockbenchBoneAnimationSchema = Readonly<{
-	rotation?: BlockbenchAnimationTimelineSchema // Blockbench rotations are in degrees.
-}>
-type BlockName = string
-type BlockId = number
+    rotation?: BlockbenchAnimationTimelineSchema;
+    position?: BlockbenchAnimationTimelineSchema;
+}>;
+type MobId = LifeformId;
+type MobDbId = string;
+type BlockName = string;
+type BlockId = number;
 type WorldBlockChangedInfo = {
-	cause: PNull<WorldBlockChangedCause>
-}
-type WorldBlockChangedCause = "Paintball" | "FloorCreator" | "Sapling" | "StemFruit" | "MeltingIce" | "Explosion"
+    cause: PNull<WorldBlockChangedCause>;
+};
+type WorldBlockChangedCause = "Paintball" | "FloorCreator" | "Sapling" | "StemFruit" | "MeltingIce" | "Explosion";
 type GameChunk = {
 	blockData: any
 	extraInfo: PersistedExtraInfo
@@ -2141,537 +2192,566 @@ type PersistedExtraInfo = {
 	// - updated infrequently, to avoid excessive writes to the DB.
 	customMetadata: any
 }
-type ItemName = string
-type ItemAttributes = { customDisplayName?: string; customDescription?: string; customAttributes?: Record<string, any> }
-type ItemDropOptions = Readonly<
-	Partial<{
-		doPhysics: boolean
-		size: number
-	}>
->
-type AnimParams = { animTextures: string[]; animationInterval: number }
-type HarvestType = "granule" | "wood" | "rock" | "cuttable"
-type RecursiveReadonlyObject<T> = {
-	readonly [P in keyof T]: RecursiveReadonly<T[P]>
-}
-type RecursiveReadonly<T> = T extends (infer R)[]
-	? RecursiveReadonlyArray<R>
-	: T extends Function
-		? T
-		: T extends object
-			? RecursiveReadonlyObject<T>
-			: T
-type RecursiveReadonlyArray<T> = ReadonlyArray<RecursiveReadonly<T>>
-type SoundType = "stone" | "wood" | "gravel" | "grass" | "glass" | "sand" | "snow" | "cloth"
-type GunStatsOverride = Partial<Pick<GunMetadata, GunStatsOverrideKey>>
+type MobType = (_TypeOf["mobTypes"])[number];
+type ItemAttributes = {
+    customDisplayName?: string;
+    customDescription?: string;
+    customAttributes?: Record<string, any>;
+};
+type ItemDropOptions = Readonly<Partial<{
+    doPhysics: boolean;
+    size: number;
+}>>;
+type AnimParams = {
+    animTextures: string[];
+    animationInterval: number;
+};
+type HarvestType = "granule" | "wood" | "rock" | "cuttable";
+type BlockMetadataModelType = "CentreCross" | "SquareSided" | "CustomPlanes" | "CustomModel" | "Slab" | "door" | "trapdoor" | "rotatableOffset" | "rotatable";
+type SpecialToolDrop = {
+    tool: ItemName | ItemName[];
+    drops: ItemName | BlockName;
+};
+type RecursiveReadonly<T> = T extends Primitive ? T : T extends (...args: never[]) => unknown ? T : T extends readonly unknown[] ? number extends T["length"] ? ReadonlyArray<RecursiveReadonly<T[number]>> : {
+    readonly [K in keyof T]: RecursiveReadonly<T[K]>;
+} : Readonly<{
+    [K in keyof T]: RecursiveReadonly<T[K]>;
+}>;
+type Primitive = string | number | boolean | bigint | symbol | undefined | null;
+type SoundType = "stone" | "wood" | "gravel" | "grass" | "glass" | "sand" | "snow" | "cloth";
+type GunStatsOverride = Partial<Omit<GunMetadata, NonOverridableStats>>;
 type GunMetadata = {
-	gunType: string
-	scopeType: "none" | "sniper"
-	muzzleFlashOffsetFromGun: [number, number, number]
-	muzzleFlashScale?: number
-	autoFireWithMouse: boolean
-	fireRate: number
-	fireRateWithHeldTouch?: number
-	damage: number
-	shotPelletCount?: number
-	reloadTime?: number
-	clipSize: number
-	reloadBulletsIndividually?: boolean
-	bulletReloadTime?: number
-	cockTime?: number
-	tagSpeedMult: number
-	subsequentTagSpeedReductionScalar: number
-	inaccuracyStanding: number
-	inaccuracyFromShot: number
-	inaccuracyMovement: number
-	yVelocityInaccuracy: number
-	inaccuracyFromJump: number
-	altInaccuracyStanding: number
-	altInaccuracyFromShot: number
-	altInaccuracyMovement: number
-	recoveryRate: number
-
-	msPerRound?: number // calculated below
-	msPerRoundTouchScreen?: number // calculated below
-
-	altYVelocityInaccuracy?: number
-	altInaccuracyFromJump?: number
-
-	hasVerticalInaccuracy?: boolean
-
-	aimZoomFactor?: number
-
-	// Kickback
-	kickbackDecreaseRate: number
-	minKickback?: number
-	maxKickback?: number
-	kickbackRate?: number
-}
-type GunStatsOverrideKey =
-	| "scopeType"
-	| "fireRate"
-	| "damage"
-	| "clipSize"
-	| "reloadTime"
-	| "bulletReloadTime"
-	| "cockTime"
-	| "kickbackDecreaseRate"
-	| "minKickback"
-	| "maxKickback"
-	| "kickbackRate"
-	| "inaccuracyStanding"
-	| "inaccuracyFromShot"
-	| "inaccuracyMovement"
-	| "yVelocityInaccuracy"
-	| "inaccuracyFromJump"
-	| "altInaccuracyStanding"
-	| "altInaccuracyFromShot"
-	| "altInaccuracyMovement"
-	| "altYVelocityInaccuracy"
-	| "altInaccuracyFromJump"
-	| "recoveryRate"
+    gunType: GunCategory;
+    scopeType: "none" | "sniper";
+    muzzleFlashOffsetFromGun: [number, number, number];
+    muzzleFlashScale?: number;
+    autoFireWithMouse: boolean;
+    fireRate: number;
+    fireRateWithHeldTouch?: number;
+    burstCount?: number;
+    burstDelay?: number;
+    damage: number;
+    shotPelletCount?: number;
+    reloadTime?: number;
+    clipSize: number;
+    reloadBulletsIndividually?: boolean;
+    bulletReloadTime?: number;
+    cockTime?: number;
+    tagSpeedMult: number;
+    subsequentTagSpeedReductionScalar: number;
+    inaccuracyStanding: number;
+    inaccuracyFromShot: number;
+    inaccuracyMovement: number;
+    yVelocityInaccuracy: number;
+    inaccuracyFromJump: number;
+    altInaccuracyStanding: number;
+    altInaccuracyFromShot: number;
+    altInaccuracyMovement: number;
+    recoveryRate: number;
+    msPerRound?: number;
+    msPerRoundTouchScreen?: number;
+    altYVelocityInaccuracy?: number;
+    altInaccuracyFromJump?: number;
+    hasVerticalInaccuracy?: boolean;
+    keepScopeOnShot?: boolean;
+    aimZoomFactor?: number;
+    kickbackDecreaseRate: number;
+    minKickback?: number;
+    maxKickback?: number;
+    kickbackRate?: number;
+};
+type NonOverridableStats = "msPerRound" | "msPerRoundTouchScreen" | "tagSpeedMult" | "subsequentTagSpeedReductionScalar";
+type GunCategory = (_TypeOf["gunCategories"])[number];
 type WeaponComboInfo = Readonly<{
-	comboWindowMs: number
-	comboMultipliers: readonly number[]
-	backstabAngle?: number // If present, hitting an enemy from behind within this angle (radians) skip to end of combo
-}>
-type AnyMetadataItem = Partial<BlockMetadataItem & NonBlockMetadataItem>
-type CustomItemStat = (_TypeOf["customItemStats"])[number]
-type InvenItem = { name: string; amount: PNull<number>; attributes: ItemAttributes; typeObj: any }
-type RecipesForItem = RecursiveReadonly<
-	{
-		requires: { items: ItemName[]; amt: number }[]
-		produces: number
-		station?: string | string[]
-		onCraftedAura?: number
-		isStarterRecipe?: boolean
-	}[]
->
-type EntityType = PNull<NetworkedEntityType | "Mesh" | "Item">
-type NetworkedEntityType = LifeformType | ThrowableItem | string | string
-type LifeformType = (_TypeOf["lifeformTypes"])[number]
-type ThrowableItem = string
-type MeshEntityType = keyof MeshEntityOpts
-type MeshEntityOptsStringified = string
+    comboWindowMs: number;
+    comboMultipliers: readonly number[];
+    backstabAngle?: number;
+}>;
+type AnyMetadataItem = Partial<BlockMetadataItem & NonBlockMetadataItem>;
+type CustomItemStat = (_TypeOf["customItemStats"])[number];
+type InvenItem = {
+    name: string;
+    amount: PNull<number>;
+    attributes: ItemAttributes;
+    typeObj: any;
+};
+type RecipesForItem = RecursiveReadonly<{
+    requires: {
+        items: ItemName[];
+        amt: number;
+    }[];
+    produces: number;
+    station?: string | string[];
+    onCraftedAura?: number;
+    isStarterRecipe?: boolean;
+    attributes?: ItemAttributes;
+}[]>;
+type EntityType = PNull<NetworkedEntityType | "Mesh" | "Item">;
+type NetworkedEntityType = LifeformType | ThrowableItem | string | string;
+type LifeformType = (_TypeOf["lifeformTypes"])[number];
+type ThrowableItem = string;
+type MeshEntityType = keyof MeshEntityOpts;
+type MeshEntityOptsStringified = string;
 type MeshEntityOpts = {
-	Box: CommonMeshEntityOpts & {
-		width: number
-		height: number
-		depth: number
-		diffuseColor?: number[]
-		emissiveColor?: number[]
-		backFaceCulling?: boolean // Default true
-		texture?: string // Can be a blockname. Wraps every one block
-		faceUV?: number[][]
-	}
-	BloxdBlock: CommonMeshEntityOpts & {
-		blockName: BlockNameOrId
-		size: number | [number, number, number]
-	}
-	Person: CommonMeshEntityOpts & {
-		size?: number
-		textures?: Partial<Cosmetics>
-		pose?: PlayerPose
-	}
-	ParticleEmitter: MeshParticleSystemOpts
-}
+    Box: CommonMeshEntityOpts & {
+        width: number;
+        height: number;
+        depth: number;
+        diffuseColor?: number[];
+        emissiveColor?: number[];
+        backFaceCulling?: boolean;
+        texture?: string;
+        faceUV?: number[][];
+        animateTexture?: boolean;
+    };
+    BloxdBlock: CommonMeshEntityOpts & {
+        blockName: BlockNameOrId;
+        size: number | [number, number, number];
+    };
+    Person: CommonMeshEntityOpts & {
+        size?: number;
+        textures?: Partial<Cosmetics>;
+        pose?: PlayerPose;
+    };
+    ParticleEmitter: MeshParticleSystemOpts;
+};
 type CommonMeshEntityOpts = {
-	hideDist?: number
-	meshOffset?: number[]
-	autoRotate?: boolean
-	lineToEId?: EntityId // EntityId to connect to using a line
-}
-type BlockNameOrId = BlockName | BlockId
-type Cosmetics = Record<CosmeticType, CosmeticName>
-type PlayerPose = (_TypeOf["playerPoses"])[number]
-type MeshParticleSystemOpts = ParticleSystemOpts &
-	CommonMeshEntityOpts & {
-		height: number
-		width: number
-		depth: number
-		emitRate: number
-		dir1?: number[]
-		dir2?: number[]
-	}
-
-type MeshParticleSystemUpdates = MeshParticleSystemOpts
-type CosmeticType = (_TypeOf["cosmeticTypes"])[number]
-type CosmeticName = string
-type MobHerdId = number
-type MobType = (_TypeOf["mobTypes"])[number]
+    hideDist?: number;
+    meshOffset?: number[];
+    autoRotate?: boolean;
+    lineToEId?: EntityId;
+};
+type BlockNameOrId = BlockName | BlockId;
+type Cosmetics = Record<CosmeticType, CosmeticName>;
+type PlayerPose = (_TypeOf["playerPoses"])[number];
+type MeshParticleSystemOpts = ParticleSystemOpts & CommonMeshEntityOpts & {
+    height: number;
+    width: number;
+    depth: number;
+    emitRate: number;
+    dir1?: number[];
+    dir2?: number[];
+};
+type CosmeticType = (_TypeOf["cosmeticTypes"])[number];
+type CosmeticName = string;
+type MobHerdId = number;
 type MobSpawnOpts<TMobType extends MobType> = Partial<{
-	mobHerdId: MobHerdId
-	spawnerId: PlayerId
-	mobDbId: MobDbId
-	name: string
-	playSoundOnSpawn: boolean
-	variation: MobVariation<TMobType>
-	physicsOpts: Partial<{
-		width: number
-		height: number
-		collidesEntities: boolean
-	}>
-}>
-type MobVariation<TMobType extends MobType> = (_TypeOf["mobVariations"])[TMobType][number]
-type MobId = LifeformId
-type MobDbId = string
-type MobSetting = (_TypeOf["mobSettings"])[number]
+    mobHerdId: MobHerdId;
+    spawnerId: PlayerId;
+    mobDbId: MobDbId;
+    name: string;
+    playSoundOnSpawn: boolean;
+    variation: MobVariation<TMobType>;
+    physicsOpts: Partial<{
+        width: number;
+        height: number;
+        collidesEntities: boolean;
+    }>;
+}>;
+type MobVariation<TMobType extends MobType> = (_TypeOf["mobVariations"])[TMobType][number];
+type MobSetting = (_TypeOf["mobSettings"])[number];
 type MobSettings<TMobType extends MobType> = {
-	variation: MobVariation<TMobType>
-	name: string
-	maxHealth: number
-	initialHealth: number
-	idleSound: PNull<string>
-	attackSound: PNull<string>
-	secondaryAttackSound: PNull<string>
-	hurtSound: PNull<string>
-	onDeathItemDrops: readonly MobItemDrop[]
-	onDeathParticleTexture: string
-	onDeathAura: number
-	baseWalkingSpeed: number
-	baseRunningSpeed: number
-	walkingSpeedMultiplier: number
-	runningSpeedMultiplier: number
-	jumpCount: number
-	baseJumpImpulseXZ: number
-	baseJumpImpulseY: number
-	jumpMultiplier: number
-	runAwayRadius: number
-	chaseRadius: number
-	territoryRadius: number
-	hostilityRadius: number
-	stoppingRadius: number
-	attackInterval: number
-	attackRadius: number
-	secondaryAttackRadius: number
-	attackDamage: number
-	secondaryAttackDamage: number
-	attackImpulse: number
-	secondaryAttackImpulse: number
-	burstAttackInfo: PNull<MobBurstAttackInfo>
-	secondaryBurstAttackInfo: PNull<MobBurstAttackInfo>
-	heldItemName: PNull<string>
-	attackItemName: PNull<string>
-	secondaryAttackItemName: PNull<string>
-	swingArmOnAttack: boolean
-	swingArmOnSecondaryAttack: boolean
-	attackEffectName: PNull<string>
-	attackEffectDuration: number
-	warpTargetSpecialAttackInfo: PNull<MobWarpTargetSpecialAttackInfo>
-	combatTetherInfo: PNull<MobCombatTetherCombatInfo>
-	evadeInfo: PNull<MobEvadeInfo>
-	tameInfo: PNull<Readonly<MobTameInfo>>
-	onTamedHealthMultiplier: number
-	petInfo: Readonly<MobPetInfo> // Instance-specific information related to mob feeding
-	ownerDbId: PNull<PlayerDbId>
-	minFollowingRadius: number
-	maxFollowingRadius: number
-	isRideable: boolean
-	healthRegen: PNull<MobHealthRegenSettings>
-	ridingSpeedMult: number
-	metaInfo: string
-}
+    variation: MobVariation<TMobType>;
+    name: string;
+    maxHealth: number;
+    initialHealth: number;
+    idleSound: PNull<string>;
+    attackSound: PNull<string>;
+    secondaryAttackSound: PNull<string>;
+    hurtSound: PNull<string>;
+    onDeathItemDrops: readonly MobItemDrop[];
+    onDeathParticleTexture: string;
+    onDeathAura: number;
+    baseWalkingSpeed: number;
+    baseRunningSpeed: number;
+    walkingSpeedMultiplier: number;
+    runningSpeedMultiplier: number;
+    jumpCount: number;
+    baseJumpImpulseXZ: number;
+    baseJumpImpulseY: number;
+    jumpMultiplier: number;
+    runAwayRadius: number;
+    chaseRadius: number;
+    territoryRadius: number;
+    hostilityRadius: number;
+    stoppingRadius: number;
+    attackInterval: number;
+    attackRadius: number;
+    secondaryAttackRadius: number;
+    attackDamage: number;
+    secondaryAttackDamage: number;
+    isReceivingDamageCooldownGlobal: boolean;
+    attackImpulse: number;
+    secondaryAttackImpulse: number;
+    rangedAttackInaccuracy: number;
+    burstAttackInfo: PNull<MobBurstAttackInfo>;
+    secondaryBurstAttackInfo: PNull<MobBurstAttackInfo>;
+    heldItemName: PNull<string>;
+    heldItemEnchantmentTier: PNull<EnchantmentTier>;
+    armour: MobArmour;
+    attackItemName: PNull<string>;
+    secondaryAttackItemName: PNull<string>;
+    swingArmOnAttack: boolean;
+    swingArmOnSecondaryAttack: boolean;
+    attackEffectName: PNull<string>;
+    attackEffectDuration: number;
+    warpTargetSpecialAttackInfo: PNull<MobWarpTargetSpecialAttackInfo>;
+    combatTetherInfo: PNull<MobCombatTetherCombatInfo>;
+    evadeInfo: PNull<MobEvadeInfo>;
+    tameInfo: PNull<Readonly<MobTameInfo>>;
+    onTamedHealthMultiplier: number;
+    petInfo: Readonly<MobPetInfo>;
+    ownerDbId: PNull<PlayerDbId>;
+    minFollowingRadius: number;
+    maxFollowingRadius: number;
+    isRideable: boolean;
+    healthRegen: PNull<MobHealthRegenSettings>;
+    ridingSpeedMult: number;
+    metaInfo: string;
+};
 type MobItemDrop = Readonly<{
-	itemName: string
-	probabilityOfDrop: number
-
-	// If a mob drops an item, then we choose a random amount within these bounds.
-	dropMinAmount: number
-	dropMaxAmount: number
-
-	// If true, the item will "burst" out of the mob rather than just dropping.
-	applyBurstImpulseToDrop?: boolean
-}>
+    itemName: string;
+    probabilityOfDrop: number;
+    dropMinAmount: number;
+    dropMaxAmount: number;
+    applyBurstImpulseToDrop?: boolean;
+}>;
 type MobBurstAttackInfo = Readonly<{
-	burstAttackIntervals: readonly number[]
-}>
+    burstAttackIntervals: readonly number[];
+}>;
+type MobArmour = Partial<Readonly<Record<ArmourPart, MobArmourPiece>>>;
 type MobWarpTargetSpecialAttackInfo = Readonly<{
-	cooldown: number
-	range: number
-	sound: PNull<string>
-	delay: number
-	minDestinationRadius: number
-	maxDestinationRadius: number
-	swingArm: boolean
-	particleOpts: PNull<TempMobParticleOpts>
-}>
+    cooldown: number;
+    range: number;
+    sound: PNull<string>;
+    delay: number;
+    minDestinationRadius: number;
+    maxDestinationRadius: number;
+    swingArm: boolean;
+    particleOpts: PNull<TempMobParticleOpts>;
+}>;
 type MobCombatTetherCombatInfo = Readonly<{
-	range: number
-	particleOpts: MobParticleOpts
-}>
+    range: number;
+    particleOpts: MobParticleOpts;
+}>;
 type MobEvadeInfo = Readonly<{
-	probability: number
-	impulse: number
-	minAngle: number
-	maxAngle: number
-}>
+    probability: number;
+    impulse: number;
+    minAngle: number;
+    maxAngle: number;
+}>;
 type MobTameInfo = {
-	tameItemName: string | readonly string[]
-	probabilityOfTame: number
-	isSaddleable?: boolean
-	saddleItemName?: string
-	foodItemNames?: readonly string[]
-	foodItemsWithEffects?: readonly Readonly<ItemNameWithEffects>[]
-	supportsFriendship?: boolean
-	likedFoods?: readonly string[]
-	neutralFoods?: readonly string[]
-	dislikedFoods?: readonly string[]
-	guaranteedDrop?: ItemName
-	commonDrops?: ItemName[]
-	levelUpBonuses?: LevelUpBonuses
-}
+    tameItemName: string | readonly string[];
+    probabilityOfTame: number;
+    isSaddleable?: boolean;
+    saddleItemName?: string;
+    foodItemNames?: readonly string[];
+    foodItemsWithEffects?: readonly Readonly<ItemNameWithEffects>[];
+    supportsFriendship?: boolean;
+    likedFoods?: readonly string[];
+    neutralFoods?: readonly string[];
+    dislikedFoods?: readonly string[];
+    guaranteedDrop?: ItemName;
+    commonDrops?: ItemName[];
+    levelUpBonuses?: LevelUpBonuses;
+};
 type MobPetInfo = {
-	friendshipPoints: number
-	lastFedAt: number
-	highestFriendshipLevelReached: MobFeedLevel
-	superlikedFood: PNull<ItemName>
-	superlikedFoodKnown: boolean
-	bonusesGained: readonly MobLevelUpBonus[]
-}
+    friendshipPoints: number;
+    lastFedAt: number;
+    highestFriendshipLevelReached: MobFeedLevel;
+    superlikedFood: PNull<ItemName>;
+    superlikedFoodKnown: boolean;
+    bonusesGained: readonly MobLevelUpBonus[];
+};
 type MobHealthRegenSettings = Readonly<{
-	amount: number
-	interval: number
-	startAfter: number
-}>
+    amount: number;
+    interval: number;
+    startAfter: number;
+}>;
+type ArmourPart = (_TypeOf["armourPieces"])[number];
+type MobArmourPiece = Readonly<{
+    itemName: ItemName;
+    enchantmentTier?: EnchantmentTier;
+}>;
 type TempMobParticleOpts = Readonly<{
-	duration: number
-}> &
-	MobParticleOpts
-type MobParticleOpts = Readonly<Pick<MeshParticleSystemOpts, "texture" | "colorGradients">>
-type ItemNameWithEffects = { itemName: string; effects: readonly Readonly<EffectOpts>[]; healAmt?: number }
-type LevelUpBonuses = RecursiveReadonly<Record<MobFeedLevelUpLevels, MobLevelUpBonus>>
-type EffectOpts = { name: PotionEffect; duration: number; level: number }
-type PotionEffect = (_TypeOf["potionEffects"])[number]
-type MobFeedLevelUpLevels = Exclude<MobFeedLevel, 0>
-type MobLevelUpBonus = (_TypeOf["mobLevelUpBonuses"])[number]
-type MobFeedLevel = InclusiveRange<_TypeOf["MAX_MOB_FEED_LEVEL"]>
-type InclusiveRange<N extends number, Arr extends number[] = []> = Arr["length"] extends N
-	? Arr[number] | Arr["length"]
-	: InclusiveRange<N, [...Arr, Arr["length"]]>
-type MobAiState = (_TypeOf["mobAiStates"])[number]
-type MobAiStateParams<TState extends MobAiState> = MobWorldView[TState]
+    duration: number;
+}> & MobParticleOpts;
+type MobParticleOpts = Readonly<Pick<MeshParticleSystemOpts, "texture" | "colorGradients">>;
+type ItemNameWithEffects = {
+    itemName: string;
+    effects: readonly Readonly<EffectOpts>[];
+    healAmt?: number;
+};
+type LevelUpBonuses = RecursiveReadonly<Record<MobFeedLevelUpLevels, MobLevelUpBonus>>;
+type EffectOpts = {
+    name: PotionEffect;
+    duration: number;
+    level: number;
+};
+type PotionEffect = (_TypeOf["potionEffects"])[number];
+type MobFeedLevelUpLevels = Exclude<MobFeedLevel, 0>;
+type MobLevelUpBonus = (_TypeOf["mobLevelUpBonuses"])[number];
+type MobFeedLevel = InclusiveRange<_TypeOf["MAX_MOB_FEED_LEVEL"]>;
+type InclusiveRange<N extends number, Arr extends number[] = []> = Arr["length"] extends N ? Arr[number] | Arr["length"] : InclusiveRange<N, [...Arr, Arr["length"]]>;
+type MobAiState = (_TypeOf["mobAiStates"])[number];
+type MobAiStateParams<TState extends MobAiState> = MobWorldView[TState];
 type MobWorldView = {
-	// The mob is stood still, but it still has awareness of its environment.
-	// For example: if the mob is hostile, it will still chase and attack nearby players.
-	idle: null
-	// The mob is stood still, and it has no awareness of its environment.
-	// It will not even react if provoked.
-	disabled: null
-	// The mob is stood still (idle) and is about to turn.
-	idleBeforeTurning: null
-	// The mob has chosen a new direction at random and is turning to face it.
-	turning: null
-	// The mob is stood still (idle) and is about to walk.
-	idleBeforeWalking: null
-	// The mob is walking in the direction it is facing.
-	walking: null
-	// The mob is running away from the target lifeform.
-	runningAway: { targetId: LifeformId }
-	// The mob is chasing the target lifeform.
-	chasing: { targetId: LifeformId }
-	// The mob is following the target lifeform.
-	// It will stop if it is within the \`minFollowingDistance\` (mob setting) of the target,
-	// and teleport to the target if it is outside the \`maxFollowingDistance\` (mob setting) of the target.
-	following: { targetId: LifeformId }
-	// The mob is stood still looking at the target.
-	watching: { targetId: LifeformId }
-	// The mob is walking towards the position.
-	// It will stop if it is within the \`stoppingRadius\` (mob setting) of the position.
-	walkingToPosition: { pos: Pos }
-	// The mob is running towards the position.
-	// It will stop if it is within the \`stoppingRadius\` (mob setting) of the position.
-	runningToPosition: { pos: Pos }
-}
+    idle: null;
+    disabled: null;
+    idleBeforeTurning: null;
+    turning: null;
+    idleBeforeWalking: null;
+    walking: null;
+    runningAway: {
+        targetId: LifeformId;
+    };
+    chasing: {
+        targetId: LifeformId;
+    };
+    following: {
+        targetId: LifeformId;
+    };
+    watching: {
+        targetId: LifeformId;
+    };
+    walkingToPosition: {
+        pos: Pos;
+    };
+    runningToPosition: {
+        pos: Pos;
+    };
+};
 type MeshEntityPhysicsOpts = {
-	doPhysics: boolean
-	onCollideTerrain?: () => void // Unsupported for custom code
-	collidesEntities?: boolean
-	collideBits?: number // bitmask category of this entity
-	collideMask?: number // bitmask category of entities this entity collides with
-	heightExpandAmt?: number // expand hitbox height by this amount
-	widthExpandAmt?: number // expand hitbox width by this amount
-	vehicleOpts?: MeshEntityVehicleOpts // Unsupported for custom code
-}
-type MeshEntityVehicleOpts = {
-	/** Physics state the player transitions to when entering this entity. */
-	physicsState: PlayerPhysicsStateData
-	/** Item to drop when punched. Omit for game-mode vehicles that shouldn't be breakable. */
-	itemDrop?: string
-}
-type PlayerPhysicsStateData = { type: PhysicsType; tier: number }
-type PlayerPhysicsState<T extends PhysicsType> = Omit<PlayerPhysicsStateData, "type"> & { type: T }
-type QTEType = keyof QTEDefinitions
+    doPhysics: boolean;
+    onCollideTerrain?: () => void;
+    collidesEntities?: boolean;
+    collideBits?: number;
+    collideMask?: number;
+    heightExpandAmt?: number;
+    widthExpandAmt?: number;
+};
+type QTEType = keyof QTEDefinitions;
 type QTEClientParameters<T extends QTEType = QTEType> = {
-	type: T
-	parameters: QTEParametersForType<T>
-}
-type QTEParametersForType<T extends QTEType> = QTEDefinitions[T]["params"]
+    type: T;
+    parameters: QTEParametersForType<T>;
+};
+type QTEParametersForType<T extends QTEType> = QTEDefinitions[T]["params"];
 interface QTEDefinitions {
-	progressBar: { params: ProgressBarQteParams; state: ProgressBarQteState }
-	timedClick: { params: TimedClickQteParams; state: TimedClickQteState }
-	gravityBar: { params: GravityBarQteParams; state: GravityBarQteState }
-	precisionBar: { params: PrecisionBarQteParams; state: PrecisionBarQteState }
-	rhythmClick: { params: RhythmClickQteParams; state: RhythmClickQteState }
+    progressBar: {
+        params: ProgressBarQteParams;
+        state: ProgressBarQteState;
+    };
+    timedClick: {
+        params: TimedClickQteParams;
+        state: TimedClickQteState;
+    };
+    gravityBar: {
+        params: GravityBarQteParams;
+        state: GravityBarQteState;
+    };
+    precisionBar: {
+        params: PrecisionBarQteParams;
+        state: PrecisionBarQteState;
+    };
+    rhythmClick: {
+        params: RhythmClickQteParams;
+        state: RhythmClickQteState;
+    };
 }
 type ProgressBarQteParams = Readonly<{
-	/** Starting progress value (0-100) @default 30 */
-	progressStartValue?: number
-	/** How much progress drains each tick while the player isn't clicking @default 0.075 */
-	progressDecreasePerTick: number
-	/** How much progress is gained per click @default 5 */
-	progressPerClick: number
-	/** If true, the QTE fails when progress reaches 0; otherwise progress clamps at 0 @default false */
-	canFail: boolean
-	/** Rich text shown as the QTE prompt @default [{ str: "Click repeatedly to complete!" }] */
-	description: CustomTextStyling
-	/** Icon displayed on the click target @default "fa-solid fa-computer-mouse" */
-	clickIcon: string
-	/** Scale multiplier for the click icon (must be > 0) @default 1 */
-	scale?: number
-	/** Rotation in degrees for the click icon (must be ≥ 0) @default 15 */
-	rotation?: number
-}>
+    /** Starting progress value (0-100) @default 30 */
+    progressStartValue?: number;
+    /** How much progress drains each tick while the player isn't clicking @default 0.075 */
+    progressDecreasePerTick: number;
+    /** How much progress is gained per click @default 5 */
+    progressPerClick: number;
+    /** If true, the QTE fails when progress reaches 0; otherwise progress clamps at 0 @default false */
+    canFail: boolean;
+    /** Rich text shown as the QTE prompt @default [{ str: "Click repeatedly to complete!" }] */
+    description: CustomTextStyling;
+    /** Icon displayed on the click target @default "fa-solid fa-computer-mouse" */
+    clickIcon: string;
+    /** Scale multiplier for the click icon (must be > 0) @default 1 */
+    scale?: number;
+    /** Rotation in degrees for the click icon (must be ≥ 0) @default 15 */
+    rotation?: number;
+}>;
 type ProgressBarQteState = {
-	progress: number
-	clickCount: number
-}
+    progress: number;
+    clickCount: number;
+};
 type TimedClickQteParams = Readonly<{
-	/** Duration in milliseconds the player has to click @default 3000 */
-	timeWindow: number
-	/** Icon displayed on the click target @default "fa-solid fa-computer-mouse" */
-	icon: string
-	/** Rich text shown as the QTE prompt @default [{ str: "Click to complete the QTE!" }] */
-	label: CustomTextStyling
-	/** Whether to display a countdown timer @default true */
-	showTimer: boolean
-	/** Scale multiplier for the icon (must be > 0) @default 1 */
-	scale?: number
-	/** Rotation in degrees for the icon (must be ≥ 0) @default 15 */
-	rotation?: number
-	/** If true, the icon pulses with a breathing animation anchored to the centre @default false */
-	breatheCenter?: boolean
-}>
+    /** Duration in milliseconds the player has to click @default 3000 */
+    timeWindow: number;
+    /** Icon displayed on the click target @default "fa-solid fa-computer-mouse" */
+    icon: string;
+    /** Rich text shown as the QTE prompt @default [{ str: "Click to complete the QTE!" }] */
+    label: CustomTextStyling;
+    /** Whether to display a countdown timer @default true */
+    showTimer: boolean;
+    /** Scale multiplier for the icon (must be > 0) @default 1 */
+    scale?: number;
+    /** Rotation in degrees for the icon (must be ≥ 0) @default 15 */
+    rotation?: number;
+    /** If true, the icon pulses with a breathing animation anchored to the centre @default false */
+    breatheCenter?: boolean;
+}>;
 type TimedClickQteState = {
-	timeRemaining: number
-	timeWindow: number
-}
+    timeRemaining: number;
+    timeWindow: number;
+};
 type GravityBarQteParams = Readonly<{
-	/** Starting progress value (0-100) @default 30 */
-	progressStartValue?: number
-	/** Size of the player's catch zone as a fraction of the bar (must be > 0, 0-1) @default 0.25 */
-	catchZoneSize: number
-	/** Speed at which the mover travels along the bar (must be > 0) @default 3 */
-	moverSpeed: number
-	/** How erratically the mover changes direction (higher = more unpredictable) @default 0.8 */
-	moverErraticness: number
-	/** Downward pull on the catch zone when the player isn't holding click @default 1 */
-	gravity: number
-	/** Upward force on the catch zone while the player holds click @default 1.5 */
-	riseSpeed: number
-	/** Progress gained per second while the mover is inside the catch zone @default 8 */
-	progressGainPerSecond: number
-	/** Progress lost per second while the mover is outside the catch zone @default 4 */
-	progressDrainPerSecond: number
-	/** If true, the QTE fails when progress reaches 0; otherwise progress clamps at 0 @default false */
-	canFail: boolean
-	/** Rich text shown as the QTE prompt @default [{ str: "Hold to catch!" }] */
-	description: CustomTextStyling
-	/** Icon displayed on the mover @default "Moonfish" */
-	icon?: string
-}>
+    /** Starting progress value (0-100) @default 30 */
+    progressStartValue?: number;
+    /** Size of the player's catch zone as a fraction of the bar (must be > 0, 0-1) @default 0.25 */
+    catchZoneSize: number;
+    /** Speed at which the mover travels along the bar (must be > 0) @default 3 */
+    moverSpeed: number;
+    /** How erratically the mover changes direction (higher = more unpredictable) @default 0.8 */
+    moverErraticness: number;
+    /** Downward pull on the catch zone when the player isn't holding click @default 1 */
+    gravity: number;
+    /** Upward force on the catch zone while the player holds click @default 1.5 */
+    riseSpeed: number;
+    /** Progress gained per second while the mover is inside the catch zone @default 8 */
+    progressGainPerSecond: number;
+    /** Progress lost per second while the mover is outside the catch zone @default 4 */
+    progressDrainPerSecond: number;
+    /** If true, the QTE fails when progress reaches 0; otherwise progress clamps at 0 @default false */
+    canFail: boolean;
+    /** Rich text shown as the QTE prompt @default [{ str: "Hold to catch!" }] */
+    description: CustomTextStyling;
+    /** Icon displayed on the mover @default "Moonfish" */
+    icon?: string;
+}>;
 type GravityBarQteState = {
-	catchZonePosition: number
-	catchZoneSize: number
-	moverPosition: number
-	progress: number
-	isCatching: boolean
-}
+    catchZonePosition: number;
+    catchZoneSize: number;
+    moverPosition: number;
+    progress: number;
+    isCatching: boolean;
+};
 type PrecisionBarQteParams = Readonly<{
-	/** Speed of the marker in full bar-widths per second (must be > 0, e.g. 1.0 = one full sweep per second) @default 0.5 */
-	speed: number
-	/** Fraction of the bar that counts as the success zone, centred in the middle (must be > 0, 0-1, e.g. 0.15 = 15%) @default 0.15 */
-	successZoneSize: number
-	/** Rich text shown as the QTE prompt @default [{ str: "Click when the marker is within the green zone." }] */
-	label: CustomTextStyling
-	/** Icon displayed on the marker @default "" */
-	icon?: string
-	/** Scale multiplier for the icon (must be > 0) @default 1 */
-	scale?: number
-	/** Rotation in degrees for the icon (must be ≥ 0) @default 0 */
-	rotation?: number
-}>
+    /** Speed of the marker in full bar-widths per second (must be > 0, e.g. 1.0 = one full sweep per second) @default 0.5 */
+    speed: number;
+    /** Fraction of the bar that counts as the success zone, centred in the middle (must be > 0, 0-1, e.g. 0.15 = 15%) @default 0.15 */
+    successZoneSize: number;
+    /** Rich text shown as the QTE prompt @default [{ str: "Click when the marker is within the green zone." }] */
+    label: CustomTextStyling;
+    /** Icon displayed on the marker @default "" */
+    icon?: string;
+    /** Scale multiplier for the icon (must be > 0) @default 1 */
+    scale?: number;
+    /** Rotation in degrees for the icon (must be ≥ 0) @default 0 */
+    rotation?: number;
+}>;
 type PrecisionBarQteState = {
-	/** Marker position as 0–1 where 0.5 is the centre */
-	markerPosition: number
-}
+    /** Marker position as 0–1 where 0.5 is the centre */
+    markerPosition: number;
+};
 type RhythmClickQteParams = Readonly<{
-	/** Number of successful clicks needed to complete the QTE (must be a positive integer) @default 5 */
-	requiredSuccesses: number
-	/** Duration in milliseconds for the outer circle to shrink from max size to centre (must be > 0) @default 1200 */
-	shrinkDurationMs: number
-	/** Fraction of the inner circle radius that counts as a successful overlap (must be > 0, 0-1, e.g. 0.15 = ±15%) @default 0.15 */
-	toleranceFraction: number
-	/** Max misses allowed before failing. If omitted, unlimited misses are permitted (must be a non-negative integer) @default 3 */
-	maxMisses?: number
-	/** Rich text shown as the QTE prompt @default [{ str: "Click when the circles align!" }] */
-	label: CustomTextStyling
-	/** Icon displayed in the centre of the circles @default "" */
-	icon?: string
-}>
+    /** Number of successful clicks needed to complete the QTE (must be a positive integer) @default 5 */
+    requiredSuccesses: number;
+    /** Duration in milliseconds for the outer circle to shrink from max size to centre (must be > 0) @default 1200 */
+    shrinkDurationMs: number;
+    /** Fraction of the inner circle radius that counts as a successful overlap (must be > 0, 0-1, e.g. 0.15 = ±15%) @default 0.15 */
+    toleranceFraction: number;
+    /** Max misses allowed before failing. If omitted, unlimited misses are permitted (must be a non-negative integer) @default 3 */
+    maxMisses?: number;
+    /** Rich text shown as the QTE prompt @default [{ str: "Click when the circles align!" }] */
+    label: CustomTextStyling;
+    /** Icon displayed in the centre of the circles @default "" */
+    icon?: string;
+}>;
 type RhythmClickQteState = {
-	/** Current outer circle radius as a fraction of the max radius (1 = fully expanded, 0 = at centre) */
-	outerCircleProgress: number
-	/** Number of successful clicks so far */
-	successes: number
-	/** Number of required successes to complete */
-	requiredSuccesses: number
-	/** Number of misses so far */
-	misses: number
-	/** Result of the most recent click: null if no click yet, true if hit, false if miss */
-	lastClickResult: boolean | null
-}
-type QTERequestId = number
-type IngameIconName = (_TypeOf["ingameIconNames"])[number]
+    /** Current outer circle radius as a fraction of the max radius (1 = fully expanded, 0 = at centre) */
+    outerCircleProgress: number;
+    /** Number of successful clicks so far */
+    successes: number;
+    /** Number of required successes to complete */
+    requiredSuccesses: number;
+    /** Number of misses so far */
+    misses: number;
+    /** Result of the most recent click: null if no click yet, true if hit, false if miss */
+    lastClickResult: boolean | null;
+};
+type QTERequestId = number;
+type IngameIconName = (_TypeOf["ingameIconNames"])[number];
 type InbuiltEffectInfo = { inbuiltLevel: number; initiatorId?: PlayerId }
+type PlayerPhysicsState<TPhysicsType extends PhysicsType> = Readonly<{
+    type: TPhysicsType;
+    tier: PhysicsTier<TPhysicsType>;
+}>;
+type PhysicsTier<TPhysicsType extends PhysicsType> = PNull<PhysicsTiers[TPhysicsType]>;
+type PhysicsTiers = {
+    [PhysicsType.DEFAULT]: null;
+    [PhysicsType.BOAT]: BoatTier;
+    [PhysicsType.GLIDER]: GliderTier;
+    [PhysicsType.BALLOON]: BalloonTier;
+    [PhysicsType.SLEEPING]: SleepingTier;
+    [PhysicsType.RIDING_MOB]: null;
+};
 type AngleDir = {
-	theta: number
-	phi: number
-}
+    theta: number;
+    phi: number;
+};
 type BlockRaycastResult = PNull<{
 	blockID: BlockId // The block ID of the block that was hit
 	position: Pos // The position of the block that was hit
 	normal: Pos // The normal of the face that was hit
 	adjacent: Pos // The position of the block adjacent to the hit face
 }>
+type MeshParticleSystemUpdates = Record<EntityId, Record<NodeName, MeshParticleSystemUpdate>>;
+type MeshParticleSystemUpdate = {
+    particleSystemDir1?: number[];
+    particleSystemDir2?: number[];
+    particleSystemMinSize?: number;
+    particleSystemMaxSize?: number;
+    particleSystemPlayingState?: boolean;
+};
+type UserCallbacks = "tick" | "onClose" | "onPlayerJoin" | "onPlayerLeave" | "onPlayerJump" | "onRespawnRequest" | "playerCommand" | "onPlayerChat" | "onPlayerChangeBlock" | "onBlockStand" | "onBlockStandStart" | "onBlockStandStop" | "onPlayerAttemptCraft" | "onPlayerCraft" | "onPlayerAttemptOpenChest" | "onPlayerOpenedChest" | "onPlayerMoveItemOutOfInventory" | "onPlayerDropItem" | "onPlayerPickedUpItem" | "onPlayerSelectInventorySlot" | "onPlayerAttack" | "onPlayerDamagingOtherPlayer" | "onPlayerDamagingMob" | "onMobDamagingPlayer" | "onMobDamagingOtherMob" | "onAttemptKillPlayer" | "onPlayerKilledOtherPlayer" | "onMobKilledPlayer" | "onPlayerKilledMob" | "onMobKilledOtherMob" | "onPlayerPotionEffect" | "onPlayerDamagingMeshEntity" | "onPlayerBreakMeshEntity" | "onPlayerUsedThrowable" | "onPlayerThrowableHitTerrain" | "onTouchscreenActionButton" | "onPlayerMoveInvenItem" | "onPlayerMoveItemIntoIdxs" | "onPlayerSwapInvenSlots" | "onPlayerMoveInvenItemWithAmt" | "onPlayerAttemptAltAction" | "onPlayerAltAction" | "onPlayerClick" | "onPlayerClickUp" | "onClientOptionUpdated" | "onMobSettingUpdated" | "onInventoryUpdated" | "onChestUpdated" | "onWorldChangeBlock" | "onCreateBloxdMeshEntity" | "onEntityCollision" | "onPlayerAttemptSpawnMob" | "onWorldAttemptSpawnMob" | "onPlayerSpawnMob" | "onWorldSpawnMob" | "onWorldAttemptDespawnMob" | "onMobDespawned" | "onChunkLoaded" | "onPlayerRequestChunk" | "onItemDropCreated" | "onPlayerStartChargingItem" | "onPlayerFinishChargingItem" | "onPlayerFinishQTE" | "onPlayerToggledShopMenu" | "onPlayerBoughtShopItem" | "onPlayerPlayedEmote" | "doPeriodicSave"
+type WorldGamemode = (_TypeOf["worldGamemodes"])[number];
+type QueuedCommandId = string
+type QueuedStatusString = (_TypeOf["QUEUED_COMMAND_STATUS_STRINGS"])[keyof _TypeOf["QUEUED_COMMAND_STATUS_STRINGS"]]
 type MultiBlockInfo = {
-	positions: { block: string; id: number; x: number; y: number; z: number }[]
-}
-type BoughtShopItem = Omit<ShopItem, "boughtCallback" | "schematicId" | "isRewardedAd">
-type ChatTags = CustomTextStyling[]
+    positions: {
+        block: string;
+        id: number;
+        x: number;
+        y: number;
+        z: number;
+    }[];
+};
+type BoughtShopItem = Omit<ShopItem, "boughtCallback" | "schematicId" | "isRewardedAd">;
 type OnPlayerChatObjectResponse = Record<PlayerId, false | ChatMessageObject>
 type ChatMessageObject = {
 	prefixContent?: ChatTags
 	chatContent?: CustomTextStyling
 }
 interface _TypeOf {
-	QUEUED_COMMAND_STATUS_STRINGS: { readonly 0: "NOT_IN_QUEUE"; readonly 1: "WAITING_TO_RUN"; readonly 2: "CURRENTLY_RUNNING"; }
 	lifeformBodyParts: readonly ["Torso", "Head", "ArmRight", "ArmLeft", "LegLeft", "LegRight"]
+	enchantmentPerks: readonly ["Damage", "Attack Speed", "Critical Damage", "Protection", "Health", "Health Regen", "Stomp Damage", "Knockback Resist", "Arrow Speed", "Arrow Damage", "Quick Charge", "Break Speed", "Momentum", "Mining Yield", "Farming Yield", "Mining Aura", "Digging Aura", "Lumber Aura", "Farming Aura", "Horizontal Knockback", "Vertical Knockback"]
+	enchantmentTiers: readonly ["Tier 1", "Tier 2", "Tier 3", "Tier 4", "Tier 5"]
 	ranks: readonly ["developer", "admin", "super", "youtuber"]
 	shopItemBadgeTypes: readonly ["new", "lucky"]
 	playerMeshNamedNodes: readonly ["TorsoNode", "HeadMesh", "ArmRightMesh", "ArmLeftMesh", "LegLeftMesh", "LegRightMesh"]
 	particlePresets: { readonly damageInner: unknown; readonly damageOuter: unknown; readonly bouncinessInner: unknown; readonly bouncinessOuter: unknown; readonly healthRegenInner: unknown; readonly healthRegenOuter: unknown; readonly speedInner: unknown; readonly speedOuter: unknown; readonly damageReductionInner: unknown; readonly damageReductionOuter: unknown; readonly invisibleInner: unknown; readonly invisibleOuter: unknown; readonly jumpBoostInner: unknown; readonly jumpBoostOuter: unknown; readonly knockbackInner: unknown; readonly knockbackOuter: unknown; readonly poisonedInner: unknown; readonly poisonedOuter: unknown; readonly slownessInner: unknown; readonly slownessOuter: unknown; readonly weaknessInner: unknown; readonly weaknessOuter: unknown; readonly cleansedInner: unknown; readonly cleansedOuter: unknown; readonly instantDamageInner: unknown; readonly instantDamageOuter: unknown; readonly instantHealthInner: unknown; readonly instantHealthOuter: unknown; readonly hasteInner: unknown; readonly hasteOuter: unknown; readonly shieldInner: unknown; readonly shieldOuter: unknown; readonly doubleJumpInner: unknown; readonly doubleJumpOuter: unknown; readonly heatResistanceInner: unknown; readonly heatResistanceOuter: unknown; readonly thiefInner: unknown; readonly thiefOuter: unknown; readonly miningYieldInner: unknown; readonly miningYieldOuter: unknown; readonly brainRotInner: unknown; readonly brainRotOuter: unknown; readonly auraInner: unknown; readonly auraOuter: unknown; readonly wallClimbingInner: unknown; readonly wallClimbingOuter: unknown; readonly airWalkInner: unknown; readonly airWalkOuter: unknown; readonly pickpocketerInner: unknown; readonly pickpocketerOuter: unknown; readonly lifestealInner: unknown; readonly lifestealOuter: unknown; readonly blindnessInner: unknown; readonly blindnessOuter: unknown; readonly poopyInner: unknown; readonly poopyOuter: unknown; readonly xRayVisionInner: unknown; readonly xRayVisionOuter: unknown; readonly defaultFirecrackerSmall: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly defaultFirecrackerLarge: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mango: unknown; readonly yellowFirecrackerSmall: unknown; readonly yellowFirecrackerLarge: unknown; readonly limeFirecrackerSmall: unknown; readonly limeFirecrackerLarge: unknown; readonly greenFirecrackerSmall: unknown; readonly greenFirecrackerLarge: unknown; readonly cyanFirecrackerSmall: unknown; readonly cyanFirecrackerLarge: unknown; readonly blueFirecrackerSmall: unknown; readonly blueFirecrackerLarge: unknown; readonly purpleFirecrackerSmall: unknown; readonly purpleFirecrackerLarge: unknown; readonly pinkFirecrackerSmall: unknown; readonly pinkFirecrackerLarge: unknown; readonly redFirecrackerSmall: unknown; readonly redFirecrackerLarge: unknown; readonly orangeFirecrackerSmall: unknown; readonly orangeFirecrackerLarge: unknown; readonly blackFirecrackerSmall: unknown; readonly blackFirecrackerLarge: unknown; readonly brownFirecrackerSmall: unknown; readonly brownFirecrackerLarge: unknown; readonly grayFirecrackerSmall: unknown; readonly grayFirecrackerLarge: unknown; readonly lightBlueFirecrackerSmall: unknown; readonly lightBlueFirecrackerLarge: unknown; readonly lightGrayFirecrackerSmall: unknown; readonly lightGrayFirecrackerLarge: unknown; readonly magentaFirecrackerSmall: unknown; readonly magentaFirecrackerLarge: unknown; readonly whiteFirecrackerSmall: unknown; readonly whiteFirecrackerLarge: unknown; readonly brainRot: unknown; readonly stomp: unknown; readonly fertiliser: unknown; readonly bonemeal: unknown; readonly mobTameSuccess: unknown; readonly mobTameFailure: unknown; readonly mobCatch: unknown; readonly spawnCaughtMob: unknown; readonly mobFeedDefault: unknown; readonly mobFeedSuperliked: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobFeedLike: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobFeedNeutral: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobFeedDisliked: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobDeath: unknown; readonly mobDeathSoul: unknown; readonly boardShopSuccess: unknown; readonly mobSpawnerBlockFail: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [80, 80, 80, 1]; readonly maxColor: [160, 160, 160, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobSpawnerBlockPassive: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [0, 200, 50, 1]; readonly maxColor: [0, 255, 100, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobSpawnerBlockNeutral: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [200, 200, 0, 1]; readonly maxColor: [255, 255, 0, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobSpawnerBlockHostile: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [200, 10, 0, 1]; readonly maxColor: [255, 20, 0, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobSpawnOrb: unknown; readonly aura: unknown; }
+	mobTypes: readonly ["Pig", "Cow", "Sheep", "Horse", "Deer", "Wolf", "Wildcat", "Spirit Golem", "Spirit Wolf", "Spirit Bear", "Spirit Stag", "Spirit Gorilla", "Bear", "Stag", "Gold Watermelon Stag", "Gorilla", "Cave Golem", "Draugr Zombie", "Draugr Skeleton", "Frost Golem", "Frost Zombie", "Frost Skeleton", "Draugr Knight", "Draugr Huntress", "Magma Golem", "Draugr Warper", "Frost Wraith", "Draugr Reaver", "Stalker", "NPC", "67", "Bobino Musculino", "Capitano Explovissimo"]
+	gunCategories: readonly ["semi_automatic", "submachine", "rifle", "pistol", "shotgun"]
 	customItemStats: readonly ["ttb", "displayName", "harvestLevel", "stoodOnSpeedMultiplier", "specialToolDrop", "specialToolBonusDrops", "description", "altActionable", "eatHealAmt", "eatShieldAmt", "damage", "attackRange", "secondaryDamage", "absorbThrowable", "armourReduction", "CrosshairText", "gunStats", "showInCreativeInven"]
-	lifeformTypes: readonly ["Player", "Pig", "Cow", "Sheep", "Horse", "Deer", "Wolf", "Wildcat", "Spirit Golem", "Spirit Wolf", "Spirit Bear", "Spirit Stag", "Spirit Gorilla", "Bear", "Stag", "Gold Watermelon Stag", "Gorilla", "Cave Golem", "Draugr Zombie", "Draugr Skeleton", "Frost Golem", "Frost Zombie", "Frost Skeleton", "Draugr Knight", "Draugr Huntress", "Magma Golem", "Draugr Warper", "Frost Wraith", "Draugr Reaver", "NPC", "67", "Bobino Musculino", "Capitan Explosivo"]
-	cosmeticTypes: readonly ["skin", "hat", "head", "eyebrows", "eyes", "back", "body", "legs", "shoes", "cape", "nameColour"]
+	lifeformTypes: readonly ["Player", "Pig", "Cow", "Sheep", "Horse", "Deer", "Wolf", "Wildcat", "Spirit Golem", "Spirit Wolf", "Spirit Bear", "Spirit Stag", "Spirit Gorilla", "Bear", "Stag", "Gold Watermelon Stag", "Gorilla", "Cave Golem", "Draugr Zombie", "Draugr Skeleton", "Frost Golem", "Frost Zombie", "Frost Skeleton", "Draugr Knight", "Draugr Huntress", "Magma Golem", "Draugr Warper", "Frost Wraith", "Draugr Reaver", "Stalker", "NPC", "67", "Bobino Musculino", "Capitano Explovissimo"]
+	cosmeticTypes: readonly ["skin", "hat", "head", "eyebrows", "eyes", "back", "body", "legs", "shoes", "cape", "nameColour", "profileEffect", "emote"]
 	playerPoses: readonly ["standing", "sitting", "zombie", "gliding", "driving", "sleeping", "riding"]
-	mobVariations: { readonly Pig: readonly ["default"]; readonly Cow: readonly ["default", "cream"]; readonly Sheep: readonly ["default", "black", "red", "orange", "pink", "purple", "yellow", "blue", "brown", "cyan", "gray", "green", "lightBlue", "lightGray", "lime", "magenta"]; readonly Horse: readonly ["default", "black", "brown", "cream"]; readonly "Cave Golem": readonly ["default", "iron"]; readonly "Draugr Zombie": readonly ["default", "longHairChestplate", "longHairClothed", "shortHairClothed"]; readonly "Draugr Skeleton": readonly ["default"]; readonly "Frost Golem": readonly ["default"]; readonly "Frost Zombie": readonly ["default", "longHairChestplate", "shortHairClothed"]; readonly "Frost Skeleton": readonly ["default"]; readonly "Draugr Knight": readonly ["default"]; readonly Wolf: readonly ["default", "white", "brown", "grey", "spectral"]; readonly Bear: readonly ["default"]; readonly Deer: readonly ["default"]; readonly Stag: readonly ["default"]; readonly "Gold Watermelon Stag": readonly ["default"]; readonly Gorilla: readonly ["default"]; readonly Wildcat: readonly ["default", "tabby", "grey", "black", "calico", "siamese", "leopard"]; readonly "Magma Golem": readonly ["default"]; readonly "Draugr Huntress": readonly ["default", "chainmail"]; readonly "Spirit Golem": readonly ["default"]; readonly "Spirit Wolf": readonly ["default"]; readonly "Spirit Bear": readonly ["default"]; readonly "Spirit Stag": readonly ["default"]; readonly "Spirit Gorilla": readonly ["default"]; readonly "Draugr Warper": readonly ["default"]; readonly "Frost Wraith": readonly ["default"]; readonly "Draugr Reaver": readonly ["default"]; readonly NPC: readonly ["default", "emma", "leo", "isabel", "sanjay", "imara", "enoch", "sara", "carmen"]; readonly "67": readonly ["default"]; readonly "Bobino Musculino": readonly ["default"]; readonly "Capitan Explosivo": readonly ["default"]; }
-	mobTypes: readonly ["Pig", "Cow", "Sheep", "Horse", "Deer", "Wolf", "Wildcat", "Spirit Golem", "Spirit Wolf", "Spirit Bear", "Spirit Stag", "Spirit Gorilla", "Bear", "Stag", "Gold Watermelon Stag", "Gorilla", "Cave Golem", "Draugr Zombie", "Draugr Skeleton", "Frost Golem", "Frost Zombie", "Frost Skeleton", "Draugr Knight", "Draugr Huntress", "Magma Golem", "Draugr Warper", "Frost Wraith", "Draugr Reaver", "NPC", "67", "Bobino Musculino", "Capitan Explosivo"]
-	mobSettings: readonly ["variation", "name", "maxHealth", "initialHealth", "idleSound", "attackSound", "secondaryAttackSound", "hurtSound", "onDeathItemDrops", "onDeathParticleTexture", "onDeathAura", "baseWalkingSpeed", "baseRunningSpeed", "walkingSpeedMultiplier", "runningSpeedMultiplier", "jumpCount", "baseJumpImpulseXZ", "baseJumpImpulseY", "jumpMultiplier", "runAwayRadius", "chaseRadius", "territoryRadius", "hostilityRadius", "stoppingRadius", "attackInterval", "attackRadius", "secondaryAttackRadius", "attackDamage", "secondaryAttackDamage", "attackImpulse", "secondaryAttackImpulse", "burstAttackInfo", "secondaryBurstAttackInfo", "heldItemName", "attackItemName", "secondaryAttackItemName", "swingArmOnAttack", "swingArmOnSecondaryAttack", "attackEffectName", "attackEffectDuration", "warpTargetSpecialAttackInfo", "combatTetherInfo", "evadeInfo", "tameInfo", "onTamedHealthMultiplier", "petInfo", "ownerDbId", "minFollowingRadius", "maxFollowingRadius", "isRideable", "healthRegen", "ridingSpeedMult", "metaInfo"]
+	mobVariations: { readonly Pig: readonly ["default"]; readonly Cow: readonly ["default", "cream"]; readonly Sheep: readonly ["default", "black", "red", "orange", "pink", "purple", "yellow", "blue", "brown", "cyan", "gray", "green", "lightBlue", "lightGray", "lime", "magenta"]; readonly Horse: readonly ["default", "black", "brown", "cream"]; readonly "Cave Golem": readonly ["default", "iron"]; readonly "Draugr Zombie": readonly ["default", "longHairChestplate", "longHairClothed", "shortHairClothed"]; readonly "Draugr Skeleton": readonly ["default"]; readonly "Frost Golem": readonly ["default"]; readonly "Frost Zombie": readonly ["default", "longHairChestplate", "shortHairClothed"]; readonly "Frost Skeleton": readonly ["default"]; readonly "Draugr Knight": readonly ["default"]; readonly Wolf: readonly ["default", "white", "brown", "grey", "spectral"]; readonly Bear: readonly ["default"]; readonly Deer: readonly ["default"]; readonly Stag: readonly ["default"]; readonly "Gold Watermelon Stag": readonly ["default"]; readonly Gorilla: readonly ["default"]; readonly Wildcat: readonly ["default", "tabby", "grey", "black", "calico", "siamese", "leopard"]; readonly "Magma Golem": readonly ["default"]; readonly "Draugr Huntress": readonly ["default", "chainmail"]; readonly "Spirit Golem": readonly ["default"]; readonly "Spirit Wolf": readonly ["default"]; readonly "Spirit Bear": readonly ["default"]; readonly "Spirit Stag": readonly ["default"]; readonly "Spirit Gorilla": readonly ["default"]; readonly "Draugr Warper": readonly ["default"]; readonly "Frost Wraith": readonly ["default"]; readonly "Draugr Reaver": readonly ["default"]; readonly Stalker: readonly ["default", "crimson", "frost", "void"]; readonly NPC: readonly ["default", "emma", "leo", "isabel", "sanjay", "imara", "enoch", "sara", "carmen"]; readonly "67": readonly ["default"]; readonly "Bobino Musculino": readonly ["default"]; readonly "Capitano Explovissimo": readonly ["default"]; }
+	mobSettings: readonly ["variation", "name", "maxHealth", "initialHealth", "idleSound", "attackSound", "secondaryAttackSound", "hurtSound", "onDeathItemDrops", "onDeathParticleTexture", "onDeathAura", "baseWalkingSpeed", "baseRunningSpeed", "walkingSpeedMultiplier", "runningSpeedMultiplier", "jumpCount", "baseJumpImpulseXZ", "baseJumpImpulseY", "jumpMultiplier", "runAwayRadius", "chaseRadius", "territoryRadius", "hostilityRadius", "stoppingRadius", "attackInterval", "attackRadius", "secondaryAttackRadius", "attackDamage", "secondaryAttackDamage", "isReceivingDamageCooldownGlobal", "attackImpulse", "secondaryAttackImpulse", "rangedAttackInaccuracy", "burstAttackInfo", "secondaryBurstAttackInfo", "heldItemName", "heldItemEnchantmentTier", "armour", "attackItemName", "secondaryAttackItemName", "swingArmOnAttack", "swingArmOnSecondaryAttack", "attackEffectName", "attackEffectDuration", "warpTargetSpecialAttackInfo", "combatTetherInfo", "evadeInfo", "tameInfo", "onTamedHealthMultiplier", "petInfo", "ownerDbId", "minFollowingRadius", "maxFollowingRadius", "isRideable", "healthRegen", "ridingSpeedMult", "metaInfo"]
+	armourPieces: readonly ["Helmet", "Chestplate", "Gauntlets", "Leggings", "Boots"]
 	potionEffects: readonly ["Speed", "Damage Reduction", "Damage", "Invisible", "Jump Boost", "Knockback", "Poisoned", "Slowness", "Weakness", "Cleansed", "Instant Damage", "Health Regen", "Instant Health", "Haste", "Shield", "Double Jump", "Heat Resistance", "Thief", "X-Ray Vision", "Mining Yield", "Brain Rot", "Aura", "Wall Climbing", "Air Walk", "Pickpocketer", "Lifesteal", "Bounciness", "Blindness", "Poopy"]
 	MAX_MOB_FEED_LEVEL: 5
 	mobLevelUpBonuses: readonly ["Renaming", "Special Drops", "Thorns", "Rainbow Wool", "Max Health +", "Damage +", "Riding Speed +", "Double Poop", "Self Yield", "Painting", "Friends", "Pack Leader", "Poison Claws", "Mob Power", "Mob Yield", "Feed Aura", "Antlers"]
 	mobAiStates: readonly ["idle", "disabled", "idleBeforeTurning", "turning", "idleBeforeWalking", "walking", "runningAway", "chasing", "following", "watching", "walkingToPosition", "runningToPosition"]
 	ingameIconNames: readonly ["Damage", "Damage Reduction", "Speed", "VoidJump", "Fist", "Frozen", "Hydrated", "Invisible", "Jump Boost", "Poisoned", "Slowness", "Weakness", "Health Regen", "Haste", "Double Jump", "Heat Resistance", "Gliding", "Boating", "Obsidian Boating", "Riding", "Bunny Hop", "FallDamage", "Feather Falling", "Thief", "X-Ray Vision", "Mining Yield", "Brain Rot", "Rested Damage", "Rested Haste", "Rested Speed", "Rested Farming Yield", "Rested Aura", "Blindness", "Pickpocketer", "Lifesteal", "Bounciness", "Air Walk", "Wall Climbing", "Thorns", "Poopy", "Draugr Knight Head", "Draugr Warper Head", "Magma Golem Head", "Mystery Fish", "Damage Enchantment", "Critical Damage Enchantment", "Attack Speed Enchantment", "Protection Enchantment", "Health Enchantment", "Health Regen Enchantment", "Stomp Damage Enchantment", "Knockback Resist Enchantment", "Arrow Speed Enchantment", "Arrow Damage Enchantment", "Quick Charge Enchantment", "Break Speed Enchantment", "Momentum Enchantment", "Mining Yield Enchantment", "Farming Yield Enchantment", "Mining Aura Enchantment", "Digging Aura Enchantment", "Lumber Aura Enchantment", "Farming Aura Enchantment", "Vertical Knockback Enchantment", "Horizontal Knockback Enchantment", "Self Yield", "Friends", "Riding Speed", "Feed Aura", "Double Poop", "Mob Slayer", "Rainbow Wool", "Pack Leader", "Max Health", "Poison Claws", "Mob Yield", "Antlers Bonus", "Health", "HealthShield", "Cross", "Friendship", "Dotted Friendship", "Hunger", "Empty Hunger", "Pixelated Heart", "Question Mark", "Trader Black", "Trader Blue", "Trader Piggy"]
+	worldGamemodes: readonly ["creative", "survival", "peaceful", "survivaladventure", "peacefuladventure", "spectator"]
+	QUEUED_COMMAND_STATUS_STRINGS: { readonly 0: "NOT_IN_QUEUE"; readonly 1: "WAITING_TO_RUN"; readonly 2: "CURRENTLY_RUNNING"; }
 	ItemMetaInfo: {
 		readonly rootName: string
 		readonly rootId: number
@@ -2685,10 +2765,14 @@ interface _TypeOf {
 		readonly books: number | null
 		readonly freshlyGrown: true | null
 		readonly roots: true | null
+		/** Lava-growing variant (e.g. Chili Pepper Seeds|Lava) */
 		readonly lava: true | null
+		/** Top half of tall plants (e.g. Tall Grass|Top, Tomato Plant|Top|FreshlyGrown) */
 		readonly top: true | null
 		readonly grassRoots: true | null
+		/** "Breaking" state (e.g. Melting Ice|Breaking) */
 		readonly breaking: true | null
+		/** Flashing animation state (e.g. Timed Spike Bomb Block|Flashing) */
 		readonly flashing: true | null
 		readonly charging: number | null
 		readonly direction: number | null
@@ -2699,25 +2783,13 @@ interface _TypeOf {
 	BlockMetadataItem: {
 		displayName: string | TranslatedText | CustomTextStyling
 		ttb?: number
-		textureInfo: | string
-			| (string | AnimParams)[]
-			| [number, number, number, number?]
-			| ({
-					colour?: [number, number, number, number?]
-			  } & AnimParams)
+		textureInfo: string | (string | AnimParams)[] | [number, number, number, number?] | ({
+	        colour?: [number, number, number, number?];
+	    } & AnimParams)
 		texturePerSide: number[]
 		harvestType: HarvestType
 		transTex: boolean
-		model: | "CentreCross"
-			| "SquareSided"
-			| "CustomPlanes"
-			| "CustomPlanes|rotatable"
-			| "CustomModel"
-			| "Slab"
-			| "door"
-			| "trapdoor"
-			| "rotatableOffset"
-			| "rotatable"
+		model: BlockMetadataModelType | string
 		itemTexture: string
 		drops: string
 		solid: boolean
@@ -2728,16 +2800,34 @@ interface _TypeOf {
 		particlesIgnoreBlack: boolean
 		harvestLevel: number
 		fluid: boolean
-		specialToolDrop: { tool: string; drops: string }
-		specialToolBonusDrops: RecursiveReadonly<Record<string, { bonusDrop: string; probabilityOfDrop: number }[]>>
+		specialToolDrop: SpecialToolDrop
+		specialToolBonusDrops: RecursiveReadonly<Record<string, {
+	        bonusDrop: string;
+	        probabilityOfDrop: number;
+	    }[]>>
 		damage: number
 		stoodOnSpeedMultiplier: number
 		description: string | TranslatedText | CustomTextStyling
 		altActionable: boolean
-		soundType: { break: SoundType; place: SoundType }
+		soundType: {
+	        break: SoundType;
+	        place: SoundType;
+	    }
 		unlitStandaloneMesh: boolean
-		customPlanesInfo: { textureIdx: number; yRot: number }[]
-		customModelInfo: { yOffset?: number; yRotOffset?: number; unlit?: boolean; emissiveColor?: [number, number, number]; backFaceCulling?: boolean }
+		customPlanesInfo: {
+	        textureIdx: number;
+	        yRot: number;
+	    }[]
+		customModelInfo: {
+	        yOffset?: number;
+	        /** Only honoured by onRotatableCreate. */
+	        yRotOffset?: number;
+	        /** Only honoured by onRotatableCreate. */
+	        xRotOffset?: number;
+	        unlit?: boolean;
+	        emissiveColor?: [number, number, number];
+	        backFaceCulling?: boolean;
+	    }
 		absorbThrowable?: boolean
 		CrosshairText?: string | CustomTextStyling
 		/** Light emission as [R, G, B], each 0-15. Omit for no emission. */
@@ -2804,13 +2894,15 @@ interface _TypeOf {
 		meta?: ItemMetaInfo
 		rootMetaDesc?: string
 		keepMetaInChest?: boolean
-		gunType?: string
+		gunType?: GunCategory
 		scopeType?: "none" | "sniper"
 		muzzleFlashOffsetFromGun?: [number, number, number]
 		muzzleFlashScale?: number
 		autoFireWithMouse?: boolean
 		fireRate?: number
 		fireRateWithHeldTouch?: number
+		burstCount?: number
+		burstDelay?: number
 		shotPelletCount?: number
 		reloadTime?: number
 		clipSize?: number
@@ -2834,6 +2926,7 @@ interface _TypeOf {
 		maxKickback?: number
 		kickbackRate?: number
 		hasVerticalInaccuracy?: boolean
+		keepScopeOnShot?: boolean
 		msPerRound?: number
 		msPerRoundTouchScreen?: number
 		altYVelocityInaccuracy?: number
@@ -2866,6 +2959,10 @@ type HalfblockPlacement = 0 | 1 | 2
 type WalkThroughType = 0 | 1 | 2
 type LobbyType = 0 | 1 | 2
 type PhysicsType = 0 | 1 | 2 | 3 | 4 | 5
+type BoatTier = 0 | 1
+type GliderTier = 0 | 1 | 2 | 3
+type BalloonTier = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15
+type SleepingTier = 0 | 1 | 2 | 3
 type ExplosionType = 0 | 1 | 2
 
 	type ClientOptions = {
@@ -2909,12 +3006,14 @@ type ExplosionType = 0 | 1 | 2
 		showBasicMovementControls: boolean
 		middleTextUpper: string | CustomTextStyling
 		middleTextLower: string | CustomTextStyling
-		crosshairText: string | CustomTextStyling
 		RightInfoText: string | CustomTextStyling
+		crosshairText: string | CustomTextStyling
 		/** If set, clients will only be able to see the closest x players (good for client perf in games with many players) */
 		numClosestPlayersVisible: number
 		showProgressBar: boolean
 		showKillfeed: boolean
+		/** Whether the viewer renders speech bubbles above other players when they send chat messages. Off by default. */
+		showChatBubbles: boolean
 		/** Allows player to select a channel that is passed as argument to onPlayerChat. See engineGameplayTypes.ts for expected format */
 		chatChannels: { channelName: string; elementContent: string | CustomTextStyling; elementBgColor: string; }[]
 		creative: boolean
@@ -2956,6 +3055,10 @@ type ExplosionType = 0 | 1 | 2
 		arrowPotionEffectDuration: number
 		/** RGBA array [r, g, b, a] for camera screen tint effect. Values fall between 0 and 1. */
 		cameraTint: [number, number, number, number]
+		/** Fog distance which overrides graphic settings. Uses graphic settings if null. */
+		fogChunkDistanceOverride: number
+		/** Fog colour override - as a hex string e.g. #ffffff */
+		fogColourOverride: string
 		/** After dying, the player can respawn after this many seconds */
 		secsToRespawn: number
 		/** When player is dead, also shows a play again button matchmakes player into a new lobby. Mostly useful for sessionBased games */
@@ -2964,6 +3067,8 @@ type ExplosionType = 0 | 1 | 2
 		autoRespawn: boolean
 		/** Text to show on respawn button. (E.g. "Spectate") */
 		respawnButtonText: string
+		/** Whether the player can use the respawn button. Otherwise forces either play again or exit */
+		useRespawnButton: boolean
 		/** MS before a killstreak expires. (defaults to never expiring) */
 		killstreakDuration: number
 		/** Damage multiplier for all types of damage */
@@ -2976,6 +3081,18 @@ type ExplosionType = 0 | 1 | 2
 		dealingDamageDefaultMultiplier: number
 		/** Mult for all types of incoming damage */
 		receivingDamageMultiplier: number
+		/** When the player is attacked, a short cooldown prevents further damage from the same attack type. If true, all attackers share that cooldown. If false, each attacker has their own. */
+		isReceivingDamageCooldownGlobal: boolean
+		/** Mult for horizontal knockback when dealing damage */
+		horizontalKnockbackMultiplier: number
+		/** Mult for vertical knockback when dealing damage */
+		verticalKnockbackMultiplier: number
+		/** Mult for the damage done by "stomping" on a lifeform, i.e.: falling on them wearing Spiked Boots. */
+		stompDamageMultiplier: number
+		/** Radius around the player that will be affected by the stomp damage. */
+		stompDamageRadius: number
+		/** Mult for the radius within which mobs can detect the player when crouching. If a player's mult is 2, then mobs will think they are twice as far away. */
+		crouchMobDetectionRadiusMultiplier: number
 		/** Scale factor to use for dropped item meshes */
 		droppedItemScale: number
 		/** Amount that player camera is affected by movement based fov */
@@ -2988,32 +3105,20 @@ type ExplosionType = 0 | 1 | 2
 		airAccScale: number
 		/** Whether to allow players to strafe and conserve momentum while airborne */
 		airMomentumConservation: boolean
-		/** Whether players take fall damage */
-		fallDamage: boolean
-		/** How much aura levels up the player */
-		auraPerLevel: number
-		/** Max aura the player can have */
-		maxAuraLevel: number
-		/** Fog distance which overrides graphic settings. Uses graphic settings if null. */
-		fogChunkDistanceOverride: number
-		/** Fog colour override - as a hex string e.g. #ffffff */
-		fogColourOverride: string
-		/** Mult for horizontal knockback when dealing damage */
-		horizontalKnockbackMultiplier: number
-		/** Mult for vertical knockback when dealing damage */
-		verticalKnockbackMultiplier: number
-		/** Mult for the damage done by "stomping" on a lifeform, i.e.: falling on them wearing Spiked Boots. */
-		stompDamageMultiplier: number
-		/** Radius around the player that will be affected by the stomp damage. */
-		stompDamageRadius: number
-		/** Mult for the radius within which mobs can detect the player when crouching. If a player's mult is 2, then mobs will think they are twice as far away. */
-		crouchMobDetectionRadiusMultiplier: number
+		/** Multiplier applied to gravity during normal movement */
+		gravityMultiplier: number
 		/** How much the player bounces off of solid blocks */
 		bounciness: number
 		/** Whether the player can climb walls */
 		canClimbWalls: boolean
 		/** Whether the player can crouch */
 		canCrouch: boolean
+		/** Whether players take fall damage */
+		fallDamage: boolean
+		/** How much aura levels up the player */
+		auraPerLevel: number
+		/** Max aura the player can have */
+		maxAuraLevel: number
 		/** Distance in blocks over which we reduce the opacity of entities as they approach the camera */
 		proximityFadeDistance: number
 		/** Minimum opacity multiplier reachable when fading entities based on camera proximity */
@@ -3026,6 +3131,10 @@ type ExplosionType = 0 | 1 | 2
 		cameraRoll: number
 		/** Duration in ms to animate/transition to the camera roll angle. 0 = instant. */
 		cameraRollTransitionMs: number
+		/** Third-person camera origin rotation offset [x, y, z] in radians. */
+		cameraRotationOffset: [number, number, number]
+		/** Third-person camera origin translation offset [x, y, z] in blocks. */
+		cameraPositionOffset: [number, number, number]
 		/** When null, just use the player's graphics setting. When set, forces lighting on (true) or off (false). */
 		lightingOverride: boolean
 		/** Sky light colour override - hex string e.g. #ffffff. */
@@ -3050,15 +3159,13 @@ type OtherEntitySettings = {
 		meshScaling: EntityMeshScalingMap
 		colorInLobbyLeaderboard: string
 		lobbyLeaderboardValues: LobbyLeaderboardValues
+		lobbyLeaderboardTags: ChatTags
 		nameTagInfo: NameTagInfo
 		hasPriorityNametag: boolean
+		multilineTextBox: MultilineTextBox
 		nameColour: "default" | "yellow" | "lime" | "green" | "aqua" | "cyan" | "blue" | "purple" | "pink" | "red" | "orange"
 	}
 
-type UserCallbacks = "tick" | "onClose" | "onPlayerJoin" | "onPlayerLeave" | "onPlayerJump" | "onRespawnRequest" | "playerCommand" | "onPlayerChat" | "onPlayerChangeBlock" | "onBlockStand" | "onPlayerAttemptCraft" | "onPlayerCraft" | "onPlayerAttemptOpenChest" | "onPlayerOpenedChest" | "onPlayerMoveItemOutOfInventory" | "onPlayerDropItem" | "onPlayerPickedUpItem" | "onPlayerSelectInventorySlot" | "onPlayerAttack" | "onPlayerDamagingOtherPlayer" | "onPlayerDamagingMob" | "onMobDamagingPlayer" | "onMobDamagingOtherMob" | "onAttemptKillPlayer" | "onPlayerKilledOtherPlayer" | "onMobKilledPlayer" | "onPlayerKilledMob" | "onMobKilledOtherMob" | "onPlayerPotionEffect" | "onPlayerDamagingMeshEntity" | "onPlayerBreakMeshEntity" | "onPlayerUsedThrowable" | "onPlayerThrowableHitTerrain" | "onTouchscreenActionButton" | "onPlayerMoveInvenItem" | "onPlayerMoveItemIntoIdxs" | "onPlayerSwapInvenSlots" | "onPlayerMoveInvenItemWithAmt" | "onPlayerAttemptAltAction" | "onPlayerAltAction" | "onPlayerClick" | "onPlayerClickUp" | "onClientOptionUpdated" | "onMobSettingUpdated" | "onInventoryUpdated" | "onChestUpdated" | "onWorldChangeBlock" | "onCreateBloxdMeshEntity" | "onEntityCollision" | "onPlayerAttemptSpawnMob" | "onWorldAttemptSpawnMob" | "onPlayerSpawnMob" | "onWorldSpawnMob" | "onWorldAttemptDespawnMob" | "onMobDespawned" | "onChunkLoaded" | "onPlayerRequestChunk" | "onItemDropCreated" | "onPlayerStartChargingItem" | "onPlayerFinishChargingItem" | "onPlayerFinishQTE" | "onPlayerToggledShopMenu" | "onPlayerBoughtShopItem" | "onPlayerPlayedEmote" | "doPeriodicSave"
-type QueuedCommandId = string
-type QueuedStatusString = (_TypeOf["QUEUED_COMMAND_STATUS_STRINGS"])[keyof _TypeOf["QUEUED_COMMAND_STATUS_STRINGS"]]
-	
 /**
  * Called every tick, 20 times per second
  * @param ms - The fixed timestep, can be used as "milliseconds since last tick"
@@ -3160,8 +3267,33 @@ declare var onPlayerSelectInventorySlot: (playerId: PlayerId, slotIndex: number)
 
 /**
  * Called when a player stands on a block
+ * @param playerId - The id of the player that stood on the block
+ * @param x - The x coordinate of the block that was stood on
+ * @param y - The y coordinate of the block that was stood on
+ * @param z - The z coordinate of the block that was stood on
+ * @param blockName - The name of the block that was stood on
  */
 declare var onBlockStand: (playerId: PlayerId, x: number, y: number, z: number, blockName: BlockName) => void
+
+/**
+ * Called when a player enters a block. Only called once per block until the player leaves the block.
+ * @param playerId - The id of the player that entered the block
+ * @param x - The x coordinate of the block that was entered
+ * @param y - The y coordinate of the block that was entered
+ * @param z - The z coordinate of the block that was entered
+ * @param blockName - The name of the block that was entered
+ */
+declare var onBlockStandStart: (playerId: PlayerId, x: number, y: number, z: number, blockName: BlockName) => void
+
+/**
+ * Called when a player leaves a block.
+ * @param playerId - The id of the player that left the block
+ * @param x - The x coordinate of the block that was left
+ * @param y - The y coordinate of the block that was left
+ * @param z - The z coordinate of the block that was left
+ * @param blockName - The name of the block that was left
+ */
+declare var onBlockStandStop: (playerId: PlayerId, x: number, y: number, z: number, blockName: BlockName) => void
 
 /**
  * Called when a player attempts to craft an item
