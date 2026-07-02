@@ -686,6 +686,40 @@ resetCanPickUpItem(playerId: PlayerId, itemId: EntityId): void
  */
 deleteItemDrop(itemId: EntityId): void
 /**
+ * Create an invisible audio entity at a world position that loops a sound to
+ * nearby players (e.g. a jukebox or fireplace).
+ *
+ * Audio entities count against the same budget as physics-less mesh entities; returns null
+ * if that budget is exhausted.
+ *
+ * @param x
+ * @param y
+ * @param z
+ * @param soundName The sound to loop.
+ * @param volume
+ * @param options {refDistance: number, maxHearDist: number, rate: number}
+ * refDistance: higher means the sound decreases less in volume with distance. Defaults to 3. Hitting is 4. Guns are 10
+ * maxHearDist: sound is not played if player is further than this. Defaults to 30
+ * rate: The speed of playback. Also affects pitch. 0.5-4. Lower playback = lower pitch. Good for varying the sound.
+ * E.g. item pickup sound has a random rate between 1 and 1.5.
+ * @returns the audio entity ID, or null if the entity budget is exhausted
+ */
+attemptCreateAudioEntity(x: number, y: number, z: number, soundName: string, volume?: number, options?: { refDistance?: number; maxHearDist?: number; rate?: number; }): PNull<EntityId>
+/**
+ * Update an audio entity's config (sound, volume, falloff, rate). Only the provided fields
+ * change.
+ *
+ * @param eId
+ * @param opts Any subset of soundName, volume, refDistance, maxHearDist, rate.
+ */
+updateAudioEntity(eId: EntityId, opts: Partial<AudioEntityOpts>): void
+/**
+ * Delete an audio entity by its entity ID (returned by attemptCreateAudioEntity).
+ *
+ * @param eId
+ */
+deleteAudioEntity(eId: EntityId): void
+/**
  * Returns all items overlapping with the given player
  *
  * @param playerId
@@ -730,6 +764,14 @@ setItemStat<K extends CustomItemStat>(playerId: PlayerId, itemName: ItemName, st
  * @param direction a vector of the direction to look, format [x, y, z]
  */
 setCameraDirection(playerId: PlayerId, direction: number[]): void
+/**
+ * Shake a player's camera.
+ *
+ * @param playerId
+ * @param intensity Shake "power" (0..1); the client clamps the accumulated power to 1.
+ * @param durationMs How long the shake lasts, in milliseconds.
+ */
+shakePlayerCamera(playerId: PlayerId, intensity: number, durationMs?: number): void
 /**
  * Set a player's opacity
  * A simple helper that calls setTargetedPlayerSettingForEveryone
@@ -2240,6 +2282,13 @@ type ItemDropOptions = Readonly<Partial<{
     doPhysics: boolean;
     size: number;
 }>>;
+type AudioEntityOpts = {
+    soundName: string;
+    volume: number;
+    refDistance: number;
+    maxHearDist: number;
+    rate: number;
+};
 type AnimParams = {
     animTextures: string[];
     animationInterval: number;
@@ -2325,7 +2374,7 @@ type RecipesForItem = RecursiveReadonly<{
     attributes?: ItemAttributes;
 }[]>;
 type EntityType = PNull<NetworkedEntityType | "Mesh" | "Item">;
-type NetworkedEntityType = LifeformType | ThrowableItem | string | string;
+type NetworkedEntityType = LifeformType | ThrowableItem | string | string | "AudioEntity";
 type LifeformType = (_TypeOf["lifeformTypes"])[number];
 type ThrowableItem = string;
 type MeshEntityType = keyof MeshEntityOpts;
@@ -2762,7 +2811,7 @@ type MeshParticleSystemUpdate = {
     particleSystemMaxSize?: number;
     particleSystemPlayingState?: boolean;
 };
-type UserCallbacks = "tick" | "onClose" | "onPlayerJoin" | "onPlayerLeave" | "onPlayerJump" | "onRespawnRequest" | "playerCommand" | "onPlayerChat" | "onPlayerChangeBlock" | "onBlockStand" | "onBlockStandStart" | "onBlockStandStop" | "onPlayerAttemptCraft" | "onPlayerCraft" | "onPlayerAttemptOpenChest" | "onPlayerOpenedChest" | "onPlayerMoveItemOutOfInventory" | "onPlayerDropItem" | "onPlayerPickedUpItem" | "onPlayerSelectInventorySlot" | "onPlayerAttack" | "onPlayerDamagingOtherPlayer" | "onPlayerDamagingMob" | "onMobDamagingPlayer" | "onMobDamagingOtherMob" | "onAttemptKillPlayer" | "onPlayerKilledOtherPlayer" | "onMobKilledPlayer" | "onPlayerKilledMob" | "onMobKilledOtherMob" | "onPlayerPotionEffect" | "onPlayerDamagingMeshEntity" | "onPlayerBreakMeshEntity" | "onPlayerUsedThrowable" | "onPlayerThrowableHitTerrain" | "onTouchscreenActionButton" | "onPlayerMoveInvenItem" | "onPlayerMoveItemIntoIdxs" | "onPlayerSwapInvenSlots" | "onPlayerMoveInvenItemWithAmt" | "onPlayerAttemptAltAction" | "onPlayerAltAction" | "onPlayerClick" | "onPlayerClickUp" | "onClientOptionUpdated" | "onMobSettingUpdated" | "onInventoryUpdated" | "onChestUpdated" | "onWorldChangeBlock" | "onCreateBloxdMeshEntity" | "onEntityCollision" | "onPlayerAttemptSpawnMob" | "onWorldAttemptSpawnMob" | "onPlayerSpawnMob" | "onWorldSpawnMob" | "onWorldAttemptDespawnMob" | "onMobDespawned" | "onChunkLoaded" | "onPlayerRequestChunk" | "onItemDropCreated" | "onPlayerStartChargingItem" | "onPlayerFinishChargingItem" | "onPlayerFinishQTE" | "onPlayerToggledShopMenu" | "onPlayerBoughtShopItem" | "onPlayerPlayedEmote" | "doPeriodicSave"
+type UserCallbacks = "tick" | "onClose" | "onPlayerJoin" | "onPlayerLeave" | "onPlayerJump" | "onRespawnRequest" | "playerCommand" | "onPlayerChat" | "onPlayerChangeBlock" | "onBlockStand" | "onBlockStandStart" | "onBlockStandStop" | "onPlayerAttemptCraft" | "onPlayerCraft" | "onPlayerAttemptOpenChest" | "onPlayerOpenedChest" | "onPlayerMoveItemOutOfInventory" | "onPlayerDropItem" | "onPlayerPickedUpItem" | "onPlayerSelectInventorySlot" | "onPlayerAttack" | "onPlayerDamagingOtherPlayer" | "onPlayerDamagingMob" | "onMobDamagingPlayer" | "onMobDamagingOtherMob" | "onAttemptKillPlayer" | "onPlayerKilledOtherPlayer" | "onMobKilledPlayer" | "onPlayerKilledMob" | "onMobKilledOtherMob" | "onPlayerPotionEffect" | "onPlayerDamagingMeshEntity" | "onPlayerBreakMeshEntity" | "onPlayerUsedThrowable" | "onPlayerThrowableHitTerrain" | "onTouchscreenActionButton" | "onPlayerMoveInvenItem" | "onPlayerMoveItemIntoIdxs" | "onPlayerSwapInvenSlots" | "onPlayerMoveInvenItemWithAmt" | "onPlayerAttemptAltAction" | "onPlayerAltAction" | "onPlayerClick" | "onPlayerClickUp" | "onClientOptionUpdated" | "onMobSettingUpdated" | "onInventoryUpdated" | "onChestUpdated" | "onWorldChangeBlock" | "onCreateBloxdMeshEntity" | "onEntityCollision" | "onPlayerAttemptSpawnMob" | "onWorldAttemptSpawnMob" | "onPlayerSpawnMob" | "onWorldSpawnMob" | "onWorldAttemptDespawnMob" | "onMobDespawned" | "onChunkLoaded" | "onPlayerRequestChunk" | "onItemDropCreated" | "onPlayerStartChargingItem" | "onPlayerFinishChargingItem" | "onPlayerFinishQTE" | "onPlayerToggledShopMenu" | "onPlayerBoughtShopItem" | "onPlayerPlayedEmote" | "onPlayerEnteredVehicle" | "onPlayerExitedVehicle" | "doPeriodicSave"
 type WorldGamemode = (_TypeOf["worldGamemodes"])[number];
 type QueuedCommandId = string
 type QueuedStatusString = (_TypeOf["QUEUED_COMMAND_STATUS_STRINGS"])[keyof _TypeOf["QUEUED_COMMAND_STATUS_STRINGS"]]
@@ -2775,6 +2824,7 @@ type MultiBlockInfo = {
         z: number;
     }[];
 };
+type MeshEntityVehicleType = (_TypeOf["meshEntityVehiclesTypes"])[number];
 type BoughtShopItem = Omit<ShopItem, "boughtCallback" | "schematicId" | "isRewardedAd">;
 type OnPlayerChatObjectResponse = Record<PlayerId, false | ChatMessageObject>
 type ChatMessageObject = {
@@ -2791,7 +2841,7 @@ interface _TypeOf {
 	healthbarDisplays: readonly ["always", "never", "onDamage"]
 	nameTagBorderStyles: readonly ["solid", "glow", "double"]
 	nameTagBorderTargets: readonly ["both", "nametag", "healthbar"]
-	particlePresets: { readonly damageInner: unknown; readonly damageOuter: unknown; readonly bouncinessInner: unknown; readonly bouncinessOuter: unknown; readonly miningYieldInner: unknown; readonly miningYieldOuter: unknown; readonly healthRegenInner: unknown; readonly healthRegenOuter: unknown; readonly damageReductionInner: unknown; readonly damageReductionOuter: unknown; readonly speedInner: unknown; readonly speedOuter: unknown; readonly invisibleInner: unknown; readonly invisibleOuter: unknown; readonly jumpBoostInner: unknown; readonly jumpBoostOuter: unknown; readonly poisonedInner: unknown; readonly poisonedOuter: unknown; readonly slownessInner: unknown; readonly slownessOuter: unknown; readonly weaknessInner: unknown; readonly weaknessOuter: unknown; readonly hasteInner: unknown; readonly hasteOuter: unknown; readonly doubleJumpInner: unknown; readonly doubleJumpOuter: unknown; readonly heatResistanceInner: unknown; readonly heatResistanceOuter: unknown; readonly thiefInner: unknown; readonly thiefOuter: unknown; readonly brainRotInner: unknown; readonly brainRotOuter: unknown; readonly blindnessInner: unknown; readonly blindnessOuter: unknown; readonly pickpocketerInner: unknown; readonly pickpocketerOuter: unknown; readonly lifestealInner: unknown; readonly lifestealOuter: unknown; readonly airWalkInner: unknown; readonly airWalkOuter: unknown; readonly wallClimbingInner: unknown; readonly wallClimbingOuter: unknown; readonly poopyInner: unknown; readonly poopyOuter: unknown; readonly knockbackInner: unknown; readonly knockbackOuter: unknown; readonly cleansedInner: unknown; readonly cleansedOuter: unknown; readonly instantDamageInner: unknown; readonly instantDamageOuter: unknown; readonly instantHealthInner: unknown; readonly instantHealthOuter: unknown; readonly shieldInner: unknown; readonly shieldOuter: unknown; readonly auraInner: unknown; readonly auraOuter: unknown; readonly xRayVisionInner: unknown; readonly xRayVisionOuter: unknown; readonly defaultFirecrackerSmall: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly defaultFirecrackerLarge: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mango: unknown; readonly blackFirecrackerSmall: unknown; readonly blackFirecrackerLarge: unknown; readonly redFirecrackerSmall: unknown; readonly redFirecrackerLarge: unknown; readonly orangeFirecrackerSmall: unknown; readonly orangeFirecrackerLarge: unknown; readonly pinkFirecrackerSmall: unknown; readonly pinkFirecrackerLarge: unknown; readonly purpleFirecrackerSmall: unknown; readonly purpleFirecrackerLarge: unknown; readonly yellowFirecrackerSmall: unknown; readonly yellowFirecrackerLarge: unknown; readonly blueFirecrackerSmall: unknown; readonly blueFirecrackerLarge: unknown; readonly brownFirecrackerSmall: unknown; readonly brownFirecrackerLarge: unknown; readonly cyanFirecrackerSmall: unknown; readonly cyanFirecrackerLarge: unknown; readonly grayFirecrackerSmall: unknown; readonly grayFirecrackerLarge: unknown; readonly greenFirecrackerSmall: unknown; readonly greenFirecrackerLarge: unknown; readonly lightBlueFirecrackerSmall: unknown; readonly lightBlueFirecrackerLarge: unknown; readonly lightGrayFirecrackerSmall: unknown; readonly lightGrayFirecrackerLarge: unknown; readonly limeFirecrackerSmall: unknown; readonly limeFirecrackerLarge: unknown; readonly magentaFirecrackerSmall: unknown; readonly magentaFirecrackerLarge: unknown; readonly whiteFirecrackerSmall: unknown; readonly whiteFirecrackerLarge: unknown; readonly brainRot: unknown; readonly stomp: unknown; readonly fertiliser: unknown; readonly bonemeal: unknown; readonly mobTameSuccess: unknown; readonly mobTameFailure: unknown; readonly mobCatch: unknown; readonly spawnCaughtMob: unknown; readonly mobFeedDefault: unknown; readonly mobFeedSuperliked: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobFeedLike: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobFeedNeutral: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobFeedDisliked: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobDeath: unknown; readonly mobDeathSoul: unknown; readonly boardShopSuccess: unknown; readonly mobSpawnerBlockFail: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [80, 80, 80, 1]; readonly maxColor: [160, 160, 160, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobSpawnerBlockPassive: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [0, 200, 50, 1]; readonly maxColor: [0, 255, 100, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobSpawnerBlockNeutral: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [200, 200, 0, 1]; readonly maxColor: [255, 255, 0, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobSpawnerBlockHostile: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [200, 10, 0, 1]; readonly maxColor: [255, 20, 0, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobSpawnOrb: unknown; readonly aura: unknown; }
+	particlePresets: { readonly shieldInner: unknown; readonly shieldOuter: unknown; readonly damageInner: unknown; readonly damageOuter: unknown; readonly healthRegenInner: unknown; readonly healthRegenOuter: unknown; readonly bouncinessInner: unknown; readonly bouncinessOuter: unknown; readonly speedInner: unknown; readonly speedOuter: unknown; readonly miningYieldInner: unknown; readonly miningYieldOuter: unknown; readonly damageReductionInner: unknown; readonly damageReductionOuter: unknown; readonly invisibleInner: unknown; readonly invisibleOuter: unknown; readonly jumpBoostInner: unknown; readonly jumpBoostOuter: unknown; readonly poisonedInner: unknown; readonly poisonedOuter: unknown; readonly slownessInner: unknown; readonly slownessOuter: unknown; readonly weaknessInner: unknown; readonly weaknessOuter: unknown; readonly hasteInner: unknown; readonly hasteOuter: unknown; readonly doubleJumpInner: unknown; readonly doubleJumpOuter: unknown; readonly heatResistanceInner: unknown; readonly heatResistanceOuter: unknown; readonly thiefInner: unknown; readonly thiefOuter: unknown; readonly brainRotInner: unknown; readonly brainRotOuter: unknown; readonly blindnessInner: unknown; readonly blindnessOuter: unknown; readonly pickpocketerInner: unknown; readonly pickpocketerOuter: unknown; readonly lifestealInner: unknown; readonly lifestealOuter: unknown; readonly airWalkInner: unknown; readonly airWalkOuter: unknown; readonly wallClimbingInner: unknown; readonly wallClimbingOuter: unknown; readonly poopyInner: unknown; readonly poopyOuter: unknown; readonly knockbackInner: unknown; readonly knockbackOuter: unknown; readonly cleansedInner: unknown; readonly cleansedOuter: unknown; readonly instantDamageInner: unknown; readonly instantDamageOuter: unknown; readonly instantHealthInner: unknown; readonly instantHealthOuter: unknown; readonly auraInner: unknown; readonly auraOuter: unknown; readonly xRayVisionInner: unknown; readonly xRayVisionOuter: unknown; readonly defaultFirecrackerSmall: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly hideDist: number; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; }; readonly defaultFirecrackerLarge: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly hideDist: number; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; }; readonly mango: unknown; readonly yellowFirecrackerSmall: unknown; readonly yellowFirecrackerLarge: unknown; readonly limeFirecrackerSmall: unknown; readonly limeFirecrackerLarge: unknown; readonly greenFirecrackerSmall: unknown; readonly greenFirecrackerLarge: unknown; readonly cyanFirecrackerSmall: unknown; readonly cyanFirecrackerLarge: unknown; readonly blueFirecrackerSmall: unknown; readonly blueFirecrackerLarge: unknown; readonly purpleFirecrackerSmall: unknown; readonly purpleFirecrackerLarge: unknown; readonly pinkFirecrackerSmall: unknown; readonly pinkFirecrackerLarge: unknown; readonly redFirecrackerSmall: unknown; readonly redFirecrackerLarge: unknown; readonly orangeFirecrackerSmall: unknown; readonly orangeFirecrackerLarge: unknown; readonly blackFirecrackerSmall: unknown; readonly blackFirecrackerLarge: unknown; readonly brownFirecrackerSmall: unknown; readonly brownFirecrackerLarge: unknown; readonly grayFirecrackerSmall: unknown; readonly grayFirecrackerLarge: unknown; readonly lightBlueFirecrackerSmall: unknown; readonly lightBlueFirecrackerLarge: unknown; readonly lightGrayFirecrackerSmall: unknown; readonly lightGrayFirecrackerLarge: unknown; readonly magentaFirecrackerSmall: unknown; readonly magentaFirecrackerLarge: unknown; readonly whiteFirecrackerSmall: unknown; readonly whiteFirecrackerLarge: unknown; readonly brainRot: unknown; readonly stomp: unknown; readonly fertiliser: unknown; readonly bonemeal: unknown; readonly mobTameSuccess: unknown; readonly mobTameFailure: unknown; readonly mobCatch: unknown; readonly spawnCaughtMob: unknown; readonly mobFeedDefault: unknown; readonly mobFeedSuperliked: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly hideDist: number; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; }; readonly mobFeedLike: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly hideDist: number; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; }; readonly mobFeedNeutral: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly hideDist: number; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; }; readonly mobFeedDisliked: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly hideDist: number; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; }; readonly mobDeath: unknown; readonly mobDeathSoul: unknown; readonly boardShopSuccess: unknown; readonly mobSpawnerBlockFail: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [80, 80, 80, 1]; readonly maxColor: [160, 160, 160, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly hideDist: number; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; }; readonly mobSpawnerBlockPassive: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [0, 200, 50, 1]; readonly maxColor: [0, 255, 100, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly hideDist: number; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; }; readonly mobSpawnerBlockNeutral: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [200, 200, 0, 1]; readonly maxColor: [255, 255, 0, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly hideDist: number; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; }; readonly mobSpawnerBlockHostile: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [200, 10, 0, 1]; readonly maxColor: [255, 20, 0, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly hideDist: number; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; }; readonly mobSpawnOrb: unknown; readonly aura: unknown; }
 	mobTypes: readonly ["Pig", "Cow", "Sheep", "Horse", "Deer", "Wolf", "Wildcat", "Spirit Golem", "Spirit Wolf", "Spirit Bear", "Spirit Stag", "Spirit Gorilla", "Bear", "Stag", "Gold Watermelon Stag", "Gorilla", "Cave Golem", "Draugr Zombie", "Draugr Skeleton", "Frost Golem", "Frost Zombie", "Frost Skeleton", "Draugr Knight", "Draugr Huntress", "Magma Golem", "Draugr Warper", "Frost Wraith", "Draugr Reaver", "Stalker", "Crone", "NPC", "67", "Bobino Musculino", "Capitano Explovissimo"]
 	gunCategories: readonly ["semi_automatic", "submachine", "rifle", "pistol", "shotgun"]
 	customItemStats: readonly ["ttb", "displayName", "harvestLevel", "stoodOnSpeedMultiplier", "specialToolDrop", "specialToolBonusDrops", "description", "altActionable", "eatHealAmt", "eatShieldAmt", "damage", "attackRange", "attackCooldownMs", "secondaryDamage", "absorbThrowable", "armourReduction", "CrosshairText", "gunStats", "showInCreativeInven"]
@@ -2808,6 +2858,7 @@ interface _TypeOf {
 	ingameIconNames: readonly ["Damage", "Damage Reduction", "Speed", "VoidJump", "Fist", "Frozen", "Hydrated", "Invisible", "Jump Boost", "Poisoned", "Slowness", "Weakness", "Health Regen", "Haste", "Double Jump", "Heat Resistance", "Gliding", "Boating", "Obsidian Boating", "Riding", "Bunny Hop", "FallDamage", "Feather Falling", "Thief", "X-Ray Vision", "Mining Yield", "Brain Rot", "Rested Damage", "Rested Haste", "Rested Speed", "Rested Farming Yield", "Rested Aura", "Blindness", "Pickpocketer", "Lifesteal", "Bounciness", "Air Walk", "Wall Climbing", "Thorns", "Poopy", "Draugr Knight Head", "Draugr Warper Head", "Magma Golem Head", "Mystery Fish", "Damage Enchantment", "Critical Damage Enchantment", "Attack Speed Enchantment", "Protection Enchantment", "Health Enchantment", "Health Regen Enchantment", "Stomp Damage Enchantment", "Knockback Resist Enchantment", "Arrow Speed Enchantment", "Arrow Damage Enchantment", "Quick Charge Enchantment", "Break Speed Enchantment", "Momentum Enchantment", "Mining Yield Enchantment", "Farming Yield Enchantment", "Mining Aura Enchantment", "Digging Aura Enchantment", "Lumber Aura Enchantment", "Farming Aura Enchantment", "Vertical Knockback Enchantment", "Horizontal Knockback Enchantment", "Self Yield", "Friends", "Riding Speed", "Feed Aura", "Double Poop", "Mob Slayer", "Rainbow Wool", "Pack Leader", "Max Health", "Poison Claws", "Mob Yield", "Antlers Bonus", "Health", "HealthShield", "Cross", "Friendship", "Dotted Friendship", "Hunger", "Empty Hunger", "Pixelated Heart", "Question Mark", "Trader Black", "Trader Blue", "Trader Piggy"]
 	worldGamemodes: readonly ["survival", "peaceful", "creative", "survivaladventure", "peacefuladventure", "spectator"]
 	QUEUED_COMMAND_STATUS_STRINGS: { readonly 0: "NOT_IN_QUEUE"; readonly 1: "WAITING_TO_RUN"; readonly 2: "CURRENTLY_RUNNING"; }
+	meshEntityVehiclesTypes: readonly ["Boat", "Obsidian Boat", "Hovercraft", "Red Kart", "Off Roader", "Speedboat"]
 	ItemMetaInfo: {
 		readonly rootName: string
 		readonly rootId: number
@@ -3023,14 +3074,12 @@ type HalfblockPlacement = 0 | 1 | 2
 type WalkThroughType = 0 | 1 | 2
 type LobbyType = 0 | 1 | 2
 type PhysicsType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
-type BoatTier = 0 | 1
+type BoatTier = 0 | 1 | 2
 type GliderTier = 0 | 1 | 2 | 3
 type BalloonTier = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15
 type SleepingTier = 0 | 1 | 2 | 3
 type CarTier = 0 | 1
 type ExplosionType = 0 | 1 | 2
-
-
 
 	type ClientOptions = {
 		canChange: boolean
@@ -3745,6 +3794,22 @@ declare var onPlayerToggledShopMenu: (playerId: PlayerId, isOpen: boolean) => vo
 
 /** Called after a player plays an emote from the emote wheel. */
 declare var onPlayerPlayedEmote: (playerId: PlayerId, emoteId: string) => void
+
+/**
+ * Called when a player enters a vehicle
+ * @param playerId - The id of the player that entered the vehicle
+ * @param vehicleType - The type of the vehicle
+ * @param vehicleEId - The id of the vehicle
+ */
+declare var onPlayerEnteredVehicle: (playerId: PlayerId, vehicleType: MeshEntityVehicleType, vehicleEId: EntityId) => void
+
+/**
+ * Called when a player exits a vehicle
+ * @param playerId - The id of the player that exited the vehicle
+ * @param vehicleType - The type of the vehicle
+ * @param vehicleEId - The id of the vehicle
+ */
+declare var onPlayerExitedVehicle: (playerId: PlayerId, vehicleType: MeshEntityVehicleType, vehicleEId: EntityId) => void
 
 /**
  * Called after a player successfully buys a shop item
