@@ -1,4 +1,3 @@
-
 	/** The ID of the player running the code.
 	 *
 	 * Lobby code usually has nobody running it, so this is null.
@@ -1931,13 +1930,13 @@ removeFromQueue(id: QueuedCommandId): void
  *
  * Example Usage:
  * ```js
- * const uiRequestId = api.addUiRequest(playerId, {
+ * const myRequestId = api.addUiRequest(playerId, {
  *   type: "standard",
  *   title: "Do you want to join the game?",
  * }, 5000)
  *
- * onUiRequestResponded = (playerId, id, response) => {
- *   if(id === uiRequestId) {
+ * onUiRequestResponded = (playerId, uiRequestId, response) => {
+ *   if (uiRequestId === myRequestId) {
  *     api.log(response)
  *   }
  * }
@@ -1949,7 +1948,28 @@ removeFromQueue(id: QueuedCommandId): void
  * @param timeoutAfterMs The timeout after which the request will be automatically deleted. A response will not be given and onUiRequestResponded will not be called.
  * @returns The ID of the request. Pass into deleteUiRequest or cross-reference with onUiRequestResponded.
  */
-addUiRequest(playerId: PlayerId, parameters: UiRequestClientParameters, timeoutAfterMs?: number): number
+addUiRequest(playerId: PlayerId, parameters: UiRequestClientParameters, timeoutAfterMs?: number): UiRequestId
+/**
+ * Add a request for the player to answer in the form of a popup. This blocks the player from doing anything else until they respond.
+ *
+ * Use onUiRequestResponded to handle the response.
+ *
+ * Example Usage:
+ * ```js
+ * const myRequestId = api.sendQuestionPopup(playerId, "Do you want to join the game?")
+ *
+ * onUiRequestResponded = (playerId, uiRequestId, response) => {
+ *   if (uiRequestId === myRequestId) {
+ *     api.log(response)
+ *   }
+ * }
+ * ```
+ *
+ * @param playerId The ID of the player to add the request to.
+ * @param requestText The text of the request.
+ * @returns The ID of the request, or null if the request was rate limited. Pass into deleteUiRequest or cross-reference with onUiRequestResponded.
+ */
+addUiRequestPopup(playerId: PlayerId, requestText: string): PNull<UiRequestId>
 /**
  * Log a message to chat.
 */
@@ -2943,8 +2963,7 @@ type WorldGamemode = (_TypeOf["worldGamemodes"])[number]
 type QueuedCommandId = string
 type QueuedStatusString = (_TypeOf["QUEUED_COMMAND_STATUS_STRINGS"])[keyof _TypeOf["QUEUED_COMMAND_STATUS_STRINGS"]]
 type UiRequestClientParameters = {
-	// eslint-disable-next-line prettier/prettier
-	type: | "standard"
+	type: "standard" | "rewardedAd"
 	title: string | CustomTextStyling
 	icons?: string[]
 	acceptText?: string | CustomTextStyling
