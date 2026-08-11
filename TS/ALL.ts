@@ -1,3 +1,4 @@
+
 	/** The ID of the player running the code.
 	 *
 	 * Lobby code usually has nobody running it, so this is null.
@@ -649,6 +650,13 @@ sendTopRightHelper(playerId: PlayerId, icon: string, text: string, opts: { durat
  * @param playerId
  */
 isMobile(playerId: PlayerId): boolean
+/**
+ * Get the amount of a given currency a player has.
+ * @param playerId
+ * @param currencyId
+ * @returns The amount of the currency, or null if the currency is not defined.
+ */
+getCurrencyAmount(playerId: PlayerId, currencyId: string): PNull<number>
 /**
  * Create a dropped item.
  * @param x
@@ -1825,10 +1833,46 @@ setPlayerDbValue(playerId: PlayerId, key: string, value: string | number): void
  */
 deletePlayerDbValue(playerId: PlayerId, key: string): void
 /**
- * Deletes all database values that are saved per player.
+ * Deletes all database values that are saved per player, including persisted currencies.
  * @param playerId
  */
 deleteAllPlayerDbValues(playerId: PlayerId): void
+/**
+ * Dynamically define a currency for a player and show it on the HUD.
+ * Amounts will persist between sessions if `persistent` is set to true.
+ * Persistent currencies count towards db length limits.
+ *
+ * Example usage:
+ * ```js
+ * api.setCurrency(myId, "myCurrency", { amount: 100, icon: "coins", iconColour: "blue", persistent: true })
+ * ```
+ *
+ * @param playerId
+ * @param currencyId
+ * @param info
+ */
+setCurrency(playerId: PlayerId, currencyId: string, info: UgcCurrencyInfo): void
+/**
+ * Delete a currency from a player. This will make the currency unknown to the player.
+ * @param playerId
+ * @param currencyId
+ */
+deleteCurrency(playerId: PlayerId, currencyId: string): void
+/**
+ * Set the amount of a currency a player has. For persistent currencies, amount/subtext count towards db length limits.
+ * @param playerId
+ * @param currencyId
+ * @param amount
+ * @param subtext
+ */
+setCurrencyAmount(playerId: PlayerId, currencyId: string, amount: number, subtext?: string | CustomTextStyling): void
+/**
+ * Give a player an amount of currency. Can be negative to remove money.
+ * @param playerId
+ * @param currencyId
+ * @param amount
+ */
+giveCurrencyAmount(playerId: PlayerId, currencyId: string, amount: number): void
 /**
  * Set a default value to be returned by your callback code if it throws an error.
  *
@@ -1956,7 +2000,7 @@ addUiRequest(playerId: PlayerId, parameters: UiRequestClientParameters, timeoutA
  *
  * Example Usage:
  * ```js
- * const myRequestId = api.sendQuestionPopup(playerId, "Do you want to join the game?")
+ * const myRequestId = api.addUiRequestPopup(playerId, "Do you want to join the game?")
  *
  * onUiRequestResponded = (playerId, uiRequestId, response) => {
  *   if (uiRequestId === myRequestId) {
@@ -2957,6 +3001,13 @@ type MeshParticleSystemUpdate = {
 	particleSystemMaxSize?: number
 	particleSystemPlayingState?: boolean
 	particleSystemColorGradients?: TimeColorGradient[]
+}
+type UgcCurrencyInfo = {
+	amount: number
+	icon: string
+	iconColour?: string
+	persistent?: boolean
+	subtext?: string | CustomTextStyling
 }
 type UserCallbacks = "tick" | "onClose" | "onPlayerJoin" | "onPlayerLeave" | "onPlayerJump" | "onRespawnRequest" | "playerCommand" | "onPlayerChat" | "onPlayerChangeBlock" | "onBlockStand" | "onBlockStandStart" | "onBlockStandStop" | "onPlayerAttemptCraft" | "onPlayerCraft" | "onPlayerAttemptOpenChest" | "onPlayerOpenedChest" | "onPlayerMoveItemOutOfInventory" | "onPlayerDropItem" | "onPlayerPickedUpItem" | "onPlayerSelectInventorySlot" | "onPlayerAttack" | "onPlayerDamagingOtherPlayer" | "onPlayerDamagingMob" | "onMobDamagingPlayer" | "onMobDamagingOtherMob" | "onAttemptKillPlayer" | "onPlayerKilledOtherPlayer" | "onMobKilledPlayer" | "onPlayerKilledMob" | "onMobKilledOtherMob" | "onPlayerPotionEffect" | "onPlayerDamagingMeshEntity" | "onPlayerBreakMeshEntity" | "onPlayerUsedThrowable" | "onPlayerThrowableHitTerrain" | "onTouchscreenActionButton" | "onPlayerMoveInvenItem" | "onPlayerMoveItemIntoIdxs" | "onPlayerSwapInvenSlots" | "onPlayerMoveInvenItemWithAmt" | "onPlayerAttemptAltAction" | "onPlayerAltAction" | "onPlayerClick" | "onPlayerClickUp" | "onClientOptionUpdated" | "onMobSettingUpdated" | "onInventoryUpdated" | "onChestUpdated" | "onWorldChangeBlock" | "onCreateBloxdMeshEntity" | "onEntityCollision" | "onPlayerAttemptSpawnMob" | "onWorldAttemptSpawnMob" | "onPlayerSpawnMob" | "onWorldSpawnMob" | "onWorldAttemptDespawnMob" | "onMobDespawned" | "onChunkLoaded" | "onPlayerRequestChunk" | "onItemDropCreated" | "onPlayerStartChargingItem" | "onPlayerFinishChargingItem" | "onPlayerFinishQTE" | "onPlayerToggledShopMenu" | "onPlayerBoughtShopItem" | "onPlayerPlayedEmote" | "onPlayerEnteredVehicle" | "onPlayerExitedVehicle" | "onUiRequestResponded" | "doPeriodicSave"
 type WorldGamemode = (_TypeOf["worldGamemodes"])[number]
