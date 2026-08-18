@@ -1,3 +1,5 @@
+/* This is not valid TypeScript, do not use as such */
+
 export interface GameApi {
 		/** The ID of the player running the code.
 		 *
