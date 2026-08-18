@@ -1,21 +1,4 @@
-
-	/** The ID of the player running the code.
-	 *
-	 * Lobby code usually has nobody running it, so this is null.
-	 */
-	declare const myId: string | null
-	/** The position of the code block or press to code board */
-	declare const thisPos: [number, number, number]
-	/** The owner of the current custom lobby */
-	declare const lobbyOwnerId: string | null
-
-	interface Console {
-		/** Log a message to chat. */
-		log(message: string): void
-	}
-	declare const console: Console
-
-	interface GameApi {
+export interface GameApi {
 		/** The ID of the player running the code.
 		 *
 		 * Lobby code usually has nobody running it, so this is null.
@@ -556,18 +539,6 @@ setBlockRect(pos1: number[], pos2: number[], blockName: BlockName): void
  * @param hasCeiling
  */
 setBlockWalls(pos1: number[], pos2: number[], blockName: BlockName, hasFloor?: boolean, hasCeiling?: boolean): void
-/**
- * Only use this instead of getBlock if you REALLY need the performance (i.e. you are iterating over tens of thousands of blocks)
- * ReturnedObject.blockData is a 32x32x32 ndarray of block ids
- * (see https://www.npmjs.com/package/ndarray)
- * Each block id is a 16-bit number
- * The ndarray should only be read from, writing to it will result in desync between the server and client
- *
- * @param pos The returned chunk contains pos
- * @returns null if the chunk is not loaded in a persisted world. ReturnedObject.blockData is an ndarray that can be accessed
- * (but modifications have to be saved with resetChunk).
- */
-getChunk(pos: number[]): PNull<GameChunk>
 /**
  * Copies chunk from one position to another.
  * A good use case for this is storing 'template' chunks that can be continuously copied to a new position.
@@ -1519,7 +1490,8 @@ setMaxPlayers(softMaxPlayers: number, maxPlayers: number): void
  * Tell a player to disconnect from the current lobby and join a new one.
  *
  * To connect to a specific variation, format is `gamename_variation`.
- * For Custom Games, this will be `classic_playerSchematic|XXXXXXXXXX`.
+ * For Custom Games, this will be `classic_playerSchematic|XXXXXXXXXX` or
+ * `classic_playerSchematic|XXXXXXXXXX|<varname>` for a named sub-variation.
  *
  * NOTE: Players won't disconnect immediately (they may play an ad before being redirected).
  *
@@ -2015,21 +1987,45 @@ addUiRequest(playerId: PlayerId, parameters: UiRequestClientParameters, timeoutA
  */
 addUiRequestPopup(playerId: PlayerId, requestText: string): PNull<UiRequestId>
 /**
+ * Matchmake a player into a sub-variation of the current custom game.
+ * Pass `"default"` for the default variation.
+ *
+ * @param playerId The player to matchmake
+ * @param varname Sub-variation name (`[A-Za-z0-9_-]`, 1-32 chars), or `"default"`
+ */
+matchmakeToVariation(playerId: PlayerId, varname: string): void
+/**
+ * Get the current sub-variation name.
+ * Returns `"default"` when there is no named sub-variation.
+ */
+getVariation(): string
+/**
  * Log a message to chat.
 */
 log(message: string): void
 
 	}
-	/** Game API */
-	declare const api: GameApi;
-type EntityId = string
-type Pos = [number, number, number]
-type LifeformId = EntityId
-type PlayerId = LifeformId
-type PNull<T> = T | null
-type PlayerDbId = string
-type LifeformBodyPart = (_TypeOf["lifeformBodyParts"])[number]
-interface PlayerAttemptDamageOtherPlayerOpts {
+
+export interface Console {
+		/** Log a message to chat. */
+		log(message: string): void
+	}
+
+export type EntityId = string
+
+export type Pos = [number, number, number]
+
+export type LifeformId = EntityId
+
+export type PlayerId = LifeformId
+
+export type PNull<T> = T | null
+
+export type PlayerDbId = string
+
+export type LifeformBodyPart = (_TypeOf["lifeformBodyParts"])[number]
+
+export interface PlayerAttemptDamageOtherPlayerOpts {
 	eId: PlayerId
 	hitEId: PlayerId
 	attemptedDmgAmt: number
@@ -2048,21 +2044,29 @@ interface PlayerAttemptDamageOtherPlayerOpts {
 	// The damaging playerDbId. If null, will default to the dbId of `eId`
 	damagerDbId?: PNull<PlayerId>
 }
-type HittingSoundOverride = { sound: string; volume: number; pitch: number }
-type ItemName = string
-type EnchantmentAttributes = {
+
+export type HittingSoundOverride = { sound: string; volume: number; pitch: number }
+
+export type ItemName = string
+
+export type EnchantmentAttributes = {
 	enchantments: Partial<Record<EnchantmentPerk, number>>
 	enchantmentTier: EnchantmentTier
 	id: string
 }
-type EnchantmentPerk = (_TypeOf["enchantmentPerks"])[number]
-type EnchantmentTier = (_TypeOf["enchantmentTiers"])[number]
-type CustomTextStyling = (string | EntityName | TranslatedText | StyledIcon | StyledText | ProgressBar | StyledKeyBinding)[]
-type TranslatedText = {
+
+export type EnchantmentPerk = (_TypeOf["enchantmentPerks"])[number]
+
+export type EnchantmentTier = (_TypeOf["enchantmentTiers"])[number]
+
+export type CustomTextStyling = (string | EntityName | TranslatedText | StyledIcon | StyledText | ProgressBar | StyledKeyBinding)[]
+
+export type TranslatedText = {
 	translationKey: string
 	params?: Record<string, string | number | boolean | EntityName>
 }
-type EntityName = {
+
+export type EntityName = {
 	entityName: string
 	ranks?: Readonly<Rank[]>
 	style?: {
@@ -2070,8 +2074,10 @@ type EntityName = {
 		colour?: string
 	}
 }
-type Rank = (_TypeOf["ranks"])[number]
-type StyledIcon = {
+
+export type Rank = (_TypeOf["ranks"])[number]
+
+export type StyledIcon = {
 	icon: string
 	style?: {
 		color?: string
@@ -2080,12 +2086,15 @@ type StyledIcon = {
 		opacity?: number
 	}
 }
-type FontSize = string
-type StyledText = {
+
+export type FontSize = string
+
+export type StyledText = {
 	str: string | EntityName | TranslatedText
 	style?: TextStyle
 }
-type TextStyle = {
+
+export type TextStyle = {
 	color?: string
 	colour?: string
 	fontWeight?: string
@@ -2093,7 +2102,8 @@ type TextStyle = {
 	fontStyle?: string
 	opacity?: number
 }
-type ProgressBar = {
+
+export type ProgressBar = {
 	// Mandatory discriminator: marks this CustomTextStyling item as a progress bar.
 	type: "ProgressBar"
 	progress: number
@@ -2102,14 +2112,18 @@ type ProgressBar = {
 	colours?: string[]
 	backgroundColour?: string
 }
-type StyledKeyBinding = {
+
+export type StyledKeyBinding = {
 	type: "StyledKeyBinding"
 	action: NoaAction
 	style?: TextStyle
 }
-type NoaAction = (_TypeOf["noaActions"])[number]
-type ClientOption = keyof ClientOptions
-type EarthSkyBox = {
+
+export type NoaAction = (_TypeOf["noaActions"])[number]
+
+export type ClientOption = keyof ClientOptions
+
+export type EarthSkyBox = {
 	type: "earth"
 	inclination?: number
 	turbidity?: number
@@ -2137,8 +2151,10 @@ type EarthSkyBox = {
 	// Not part of sky model by default; heavily tint to a vertex color
 	vertexTint?: Vec3
 }
-type Vec3 = [number, number, number]
-type LobbyLeaderboardInfo = Record<
+
+export type Vec3 = [number, number, number]
+
+export type LobbyLeaderboardInfo = Record<
 	string,
 	{
 		displayName?: string | CustomTextStyling
@@ -2147,15 +2163,21 @@ type LobbyLeaderboardInfo = Record<
 		sortPriority?: number
 	}
 >
-type TextWithDisplayOptions = {
+
+export type TextWithDisplayOptions = {
 	showBackground?: boolean // Defaults to true. When false, the option's background panel is hidden.
 	content: string | CustomTextStyling
 }
-type HeaderChip = string | CustomTextStyling | TextWithDisplayOptions
-type GunshotOrigin = "default" | "head"
-type ShopCategoryKey = string
-type ShopItemKey = string
-type ShopItem = {
+
+export type HeaderChip = string | CustomTextStyling | TextWithDisplayOptions
+
+export type GunshotOrigin = "default" | "head"
+
+export type ShopCategoryKey = string
+
+export type ShopItemKey = string
+
+export type ShopItem = {
 	image: string
 	schematicId?: SchematicId
 	cost?: number
@@ -2193,7 +2215,8 @@ type ShopItem = {
 	sortPriority?: number // Descending, bigger number means closer to the top
 	hidden?: boolean
 }
-type ShopItemUserInput =
+
+export type ShopItemUserInput =
 	| { type: "text"; placeholderText?: string; wordCharsOnly?: boolean; initialValue?: string } // wordCharsOnly defaults to false. If true, only allows w character (alphanumeric and _). initialValue always takes precedence as the text input value when set.
 	| { type: "number"; placeholderText?: string; initialValue?: string }
 	| {
@@ -2205,9 +2228,12 @@ type ShopItemUserInput =
 	  }
 	| { type: "player"; excludedPlayers?: PlayerId[] } // Defaults to excluding the current player
 	| { type: "color"; initialValue?: string }
-type SchematicId = string
-type ShopItemBadgeType = (_TypeOf["shopItemBadgeTypes"])[number]
-type ShopCategoryConfig = Partial<{
+
+export type SchematicId = string
+
+export type ShopItemBadgeType = (_TypeOf["shopItemBadgeTypes"])[number]
+
+export type ShopCategoryConfig = Partial<{
 	autoSelectCategory: boolean
 	customTitle: string // Supports translation keys and ordinary text
 	redDot: boolean
@@ -2215,15 +2241,22 @@ type ShopCategoryConfig = Partial<{
 	sortPriority: number
 	description: string | CustomTextStyling
 }>
-type OtherEntitySetting = keyof OtherEntitySettings
-type EntityMeshScalingMap = {
+
+export type OtherEntitySetting = keyof OtherEntitySettings
+
+export type EntityMeshScalingMap = {
 	[key in EntityNamedNode]?: number[]
 }
-type EntityNamedNode = PlayerMeshNamedNode
-type PlayerMeshNamedNode = (_TypeOf["playerMeshNamedNodes"])[number]
-type LobbyLeaderboardValues = Record<string, string | number | CustomTextStyling>
-type ChatTags = CustomTextStyling[]
-type NameTagInfo = {
+
+export type EntityNamedNode = PlayerMeshNamedNode
+
+export type PlayerMeshNamedNode = (_TypeOf["playerMeshNamedNodes"])[number]
+
+export type LobbyLeaderboardValues = Record<string, string | number | CustomTextStyling>
+
+export type ChatTags = CustomTextStyling[]
+
+export type NameTagInfo = {
 	backgroundColor?: string
 	content?: (CustomTextStyling[number] | RankInfo)[]
 	subtitle?: (CustomTextStyling[number] | RankInfo)[]
@@ -2232,7 +2265,8 @@ type NameTagInfo = {
 	healthbar?: HealthbarInfo
 	border?: NameTagBorder
 }
-type RankInfo = {
+
+export type RankInfo = {
 	// Font Awesome icon name
 	icon: string
 	mainRGB: string
@@ -2252,7 +2286,8 @@ type RankInfo = {
 	}
 	visible: boolean // If false, this rank will not be shown in the player list or in the chat
 }
-type HealthbarInfo = Readonly<{
+
+export type HealthbarInfo = Readonly<{
 	// Controls when the healthbar is shown.
 	// "onDamage" (default) shows it for a few seconds after the entity takes damage.
 	display?: HealthbarDisplay
@@ -2263,7 +2298,8 @@ type HealthbarInfo = Readonly<{
 	// Undefined uses the default green -> orange -> red depleting gradient.
 	foregroundColour?: string | readonly HealthbarColourGradient[]
 }>
-type NameTagBorder = Readonly<{
+
+export type NameTagBorder = Readonly<{
 	colour: string
 	// Visual preset:
 	// - "solid": a flat outline.
@@ -2273,16 +2309,22 @@ type NameTagBorder = Readonly<{
 	width?: FontSize
 	applyTo?: NameTagBorderTarget
 }>
-type HealthbarDisplay = (_TypeOf["healthbarDisplays"])[number]
-type HealthbarColourGradient = Readonly<{ healthFraction: number; colour: string }>
-type NameTagBorderStyle = (_TypeOf["nameTagBorderStyles"])[number]
-type NameTagBorderTarget = (_TypeOf["nameTagBorderTargets"])[number]
-type MultilineTextBox = {
+
+export type HealthbarDisplay = (_TypeOf["healthbarDisplays"])[number]
+
+export type HealthbarColourGradient = Readonly<{ healthFraction: number; colour: string }>
+
+export type NameTagBorderStyle = (_TypeOf["nameTagBorderStyles"])[number]
+
+export type NameTagBorderTarget = (_TypeOf["nameTagBorderTargets"])[number]
+
+export type MultilineTextBox = {
 	content: (CustomTextStyling[number] | RankInfo)[]
 	backgroundColor?: string
 	animateIn?: boolean
 }
-type TempParticleSystemOpts = ParticleSystemOpts & {
+
+export type TempParticleSystemOpts = ParticleSystemOpts & {
 	dir1: number[]
 	dir2: number[]
 	pos1: number[]
@@ -2290,12 +2332,14 @@ type TempParticleSystemOpts = ParticleSystemOpts & {
 	manualEmitCount: number
 	hideDist: number
 }
-type ParticlePresetOpts = {
+
+export type ParticlePresetOpts = {
 	presetId: ParticlePresetId
 	pos1: number[]
 	pos2: number[]
 }
-type ParticleSystemOpts = {
+
+export type ParticleSystemOpts = {
 	texture: string
 	minLifeTime: number
 	maxLifeTime: number
@@ -2308,38 +2352,48 @@ type ParticleSystemOpts = {
 	colorGradients: TimeColorGradient[] | RandomColorGradient[]
 	blendMode: ParticleSystemBlendMode
 }
-type VelocityGradient = {
+
+export type VelocityGradient = {
 	timeFraction: number
 	factor: number
 	factor2: number
 }
-type TimeColorGradient = {
+
+export type TimeColorGradient = {
 	timeFraction: number
 	minColor: [number, number, number, number]
 	maxColor?: [number, number, number, number]
 }
-type RandomColorGradient = {
+
+export type RandomColorGradient = {
 	color: [number, number, number]
 }
-type ParticlePresetId = keyof _TypeOf["particlePresets"]
-type AnimationSchema = Readonly<{
+
+export type ParticlePresetId = keyof _TypeOf["particlePresets"]
+
+export type AnimationSchema = Readonly<{
 	animationDurationMs: number
 	loop?: LoopModeSchema
 	nodeAnimations?: NodeSkeletonAnimationSchema
 }>
-type BlockbenchAnimationSchema = Readonly<{
+
+export type BlockbenchAnimationSchema = Readonly<{
 	animation_length: number // The duration of the animation in seconds.
 	loop?: BlockbenchLoopModeSchema
 	bones?: BlockbenchBonesAnimationSchema
 }>
-type LoopModeSchema = boolean | "hold-on-last-frame"
-type AnimationTimelineSchema = readonly KeyframeSchema[]
-type KeyframeSchema = Readonly<{
+
+export type LoopModeSchema = boolean | "hold-on-last-frame"
+
+export type AnimationTimelineSchema = readonly KeyframeSchema[]
+
+export type KeyframeSchema = Readonly<{
 	timeFraction: number
 	rotation?: LerpPointSchema // Rotations are assumed to be in radians.
 	position?: LerpPointSchema // Position offsets in mesh-local units; (0, 0, 0) means the node's rest pose.
 }>
-type LerpPointSchema =
+
+export type LerpPointSchema =
 	| Point
 	| Readonly<{
 			lerpMode?: LerpModeSchema
@@ -2350,42 +2404,62 @@ type LerpPointSchema =
 			pre: Point // When lerping towards a point, we lerp towards its pre.
 			post: Point // When lerping away from a point, we lerp away from its post.
 	  }>
-type Point = Readonly<Vec3>
-type LerpModeSchema = "linear" | "catmull-rom-spline"
-type BlockbenchLoopModeSchema = boolean | "hold_on_last_frame"
-type BlockbenchAnimationTimelineSchema = Point | Readonly<Record<TimestampString, BlockbenchAnimationFrameSchema>>
-type TimestampString = string
-type BlockbenchAnimationFrameSchema =
+
+export type Point = Readonly<Vec3>
+
+export type LerpModeSchema = "linear" | "catmull-rom-spline"
+
+export type BlockbenchLoopModeSchema = boolean | "hold_on_last_frame"
+
+export type BlockbenchAnimationTimelineSchema = Point | Readonly<Record<TimestampString, BlockbenchAnimationFrameSchema>>
+
+export type TimestampString = string
+
+export type BlockbenchAnimationFrameSchema =
 	| Point
 	| Readonly<{
 			lerp_mode?: BlockbenchLerpModeSchema
 			pre?: Point // When lerping towards a point, we lerp towards its pre.
 			post: Point // When lerping away from a point, we lerp away from its post.
 	  }>
-type BlockbenchLerpModeSchema = "linear" | "catmullrom"
-type NodeSkeletonAnimationSchema = Readonly<Record<NodeName, NodeAnimationSchema>>
-type NodeName = string
-type NodeAnimationSchema = Readonly<{
+
+export type BlockbenchLerpModeSchema = "linear" | "catmullrom"
+
+export type NodeSkeletonAnimationSchema = Readonly<Record<NodeName, NodeAnimationSchema>>
+
+export type NodeName = string
+
+export type NodeAnimationSchema = Readonly<{
 	timeline: AnimationTimelineSchema
 }>
-type BlockbenchBonesAnimationSchema = Readonly<Record<NodeName, BlockbenchBoneAnimationSchema>>
-type BlockbenchBoneAnimationSchema = Readonly<{
+
+export type BlockbenchBonesAnimationSchema = Readonly<Record<NodeName, BlockbenchBoneAnimationSchema>>
+
+export type BlockbenchBoneAnimationSchema = Readonly<{
 	rotation?: BlockbenchAnimationTimelineSchema // Blockbench rotations are in degrees.
 	position?: BlockbenchAnimationTimelineSchema // Blockbench position offsets in mesh-local units; rest pose is (0, 0, 0).
 }>
-type MobId = LifeformId
-type MobDbId = string
-type BlockName = string
-type BlockId = number
-type WorldBlockChangedInfo = {
+
+export type MobId = LifeformId
+
+export type MobDbId = string
+
+export type BlockName = string
+
+export type BlockId = number
+
+export type WorldBlockChangedInfo = {
 	cause: PNull<WorldBlockChangedCause>
 }
-type WorldBlockChangedCause = "Paintball" | "FloorCreator" | "Sapling" | "StemFruit" | "MeltingIce" | "Explosion"
-type GameChunk = {
+
+export type WorldBlockChangedCause = "Paintball" | "FloorCreator" | "Sapling" | "StemFruit" | "MeltingIce" | "Explosion"
+
+export type GameChunk = {
 	blockData: any
 	extraInfo: PersistedExtraInfo
 }
-type PersistedExtraInfo = {
+
+export type PersistedExtraInfo = {
 	specialBlocks: any[]
 	entities: any[]
 	// We allow games and plugins to store custom metadata in the chunk,
@@ -2394,14 +2468,17 @@ type PersistedExtraInfo = {
 	// - updated infrequently, to avoid excessive writes to the DB.
 	customMetadata: any
 }
-type ItemAttributes = { customDisplayName?: string; customDescription?: string; customAttributes?: Record<string, any> }
-type ItemDropOptions = Readonly<
+
+export type ItemAttributes = { customDisplayName?: string; customDescription?: string; customAttributes?: Record<string, any> }
+
+export type ItemDropOptions = Readonly<
 	Partial<{
 		doPhysics: boolean
 		size: number
 	}>
 >
-type AudioEntityOpts = {
+
+export type AudioEntityOpts = {
 	soundName: string
 	// Base relative volume in [0, 1], before distance attenuation.
 	volume: number
@@ -2412,9 +2489,12 @@ type AudioEntityOpts = {
 	// Playback rate multiplier (1 = normal pitch/speed).
 	rate: number
 }
-type AnimParams = { animTextures: string[]; animationInterval: number }
-type HarvestType = "granule" | "wood" | "rock" | "cuttable"
-type BlockMetadataModelType =
+
+export type AnimParams = { animTextures: string[]; animationInterval: number }
+
+export type HarvestType = "granule" | "wood" | "rock" | "cuttable"
+
+export type BlockMetadataModelType =
 	| "CentreCross"
 	| "SquareSided"
 	| "CustomPlanes"
@@ -2424,8 +2504,10 @@ type BlockMetadataModelType =
 	| "trapdoor"
 	| "rotatableOffset"
 	| "rotatable"
-type SpecialToolDrop = { tool: ItemName | ItemName[]; drops: ItemName | BlockName }
-type RecursiveReadonly<T> = T extends Primitive
+
+export type SpecialToolDrop = { tool: ItemName | ItemName[]; drops: ItemName | BlockName }
+
+export type RecursiveReadonly<T> = T extends Primitive
 	? T
 	: T extends (...args: never[]) => unknown
 		? T
@@ -2434,10 +2516,14 @@ type RecursiveReadonly<T> = T extends Primitive
 				? ReadonlyArray<RecursiveReadonly<T[number]>> // T[]
 				: { readonly [K in keyof T]: RecursiveReadonly<T[K]> } // Tuple
 			: Readonly<{ [K in keyof T]: RecursiveReadonly<T[K]> }>
-type Primitive = string | number | boolean | bigint | symbol | undefined | null
-type SoundType = "stone" | "wood" | "gravel" | "grass" | "glass" | "sand" | "snow" | "cloth"
-type GunStatsOverride = Partial<Omit<GunMetadata, NonOverridableStats>>
-type GunMetadata = {
+
+export type Primitive = string | number | boolean | bigint | symbol | undefined | null
+
+export type SoundType = "stone" | "wood" | "gravel" | "grass" | "glass" | "sand" | "snow" | "cloth"
+
+export type GunStatsOverride = Partial<Omit<GunMetadata, NonOverridableStats>>
+
+export type GunMetadata = {
 	gunType: GunCategory // Used for sounds
 	scopeType: "none" | "sniper"
 	muzzleFlashOffsetFromGun: Vec3
@@ -2484,7 +2570,8 @@ type GunMetadata = {
 	maxKickback?: number
 	kickbackRate?: number
 }
-type NonOverridableStats =
+
+export type NonOverridableStats =
 	// Precomputed values
 	| "msPerRound"
 	| "msPerRoundTouchScreen"
@@ -2493,16 +2580,22 @@ type NonOverridableStats =
 	// TODO: Fix them
 	| "tagSpeedMult"
 	| "subsequentTagSpeedReductionScalar"
-type GunCategory = (_TypeOf["gunCategories"])[number]
-type WeaponComboInfo = Readonly<{
+
+export type GunCategory = (_TypeOf["gunCategories"])[number]
+
+export type WeaponComboInfo = Readonly<{
 	comboWindowMs: number
 	comboMultipliers: readonly number[]
 	backstabAngle?: number // If present, hitting an enemy from behind within this angle (radians) skip to end of combo
 }>
-type AnyMetadataItem = Partial<BlockMetadataItem & NonBlockMetadataItem>
-type CustomItemStat = (_TypeOf["customItemStats"])[number]
-type InvenItem = { name: string; amount: PNull<number>; attributes: ItemAttributes; typeObj: any }
-type RecipesForItem = RecursiveReadonly<
+
+export type AnyMetadataItem = Partial<BlockMetadataItem & NonBlockMetadataItem>
+
+export type CustomItemStat = (_TypeOf["customItemStats"])[number]
+
+export type InvenItem = { name: string; amount: PNull<number>; attributes: ItemAttributes; typeObj: any }
+
+export type RecipesForItem = RecursiveReadonly<
 	{
 		requires: { items: ItemName[]; amt: number }[]
 		produces: number
@@ -2512,18 +2605,25 @@ type RecipesForItem = RecursiveReadonly<
 		attributes?: ItemAttributes
 	}[]
 >
-type EntityType = PNull<NetworkedEntityType | "Mesh" | "Item">
-type NetworkedEntityType =
+
+export type EntityType = PNull<NetworkedEntityType | "Mesh" | "Item">
+
+export type NetworkedEntityType =
 	| LifeformType
 	| ThrowableItem
 	| string
 	| string
 	| "AudioEntity"
-type LifeformType = (_TypeOf["lifeformTypes"])[number]
-type ThrowableItem = string
-type MeshEntityType = keyof MeshEntityOpts
-type MeshEntityOptsStringified = string
-type MeshEntityOpts = {
+
+export type LifeformType = (_TypeOf["lifeformTypes"])[number]
+
+export type ThrowableItem = string
+
+export type MeshEntityType = keyof MeshEntityOpts
+
+export type MeshEntityOptsStringified = string
+
+export type MeshEntityOpts = {
 	Box: CommonMeshEntityOpts & {
 		width: number
 		height: number
@@ -2546,16 +2646,21 @@ type MeshEntityOpts = {
 	}
 	ParticleEmitter: MeshParticleSystemOpts
 }
-type CommonMeshEntityOpts = {
+
+export type CommonMeshEntityOpts = {
 	hideDist?: number
 	meshOffset?: number[]
 	autoRotate?: boolean
 	lineToEId?: EntityId // EntityId to connect to using a line
 }
-type BlockNameOrId = BlockName | BlockId
-type Cosmetics = Record<CosmeticType, CosmeticName>
-type PlayerPose = (_TypeOf["playerPoses"])[number]
-type MeshParticleSystemOpts = ParticleSystemOpts &
+
+export type BlockNameOrId = BlockName | BlockId
+
+export type Cosmetics = Record<CosmeticType, CosmeticName>
+
+export type PlayerPose = (_TypeOf["playerPoses"])[number]
+
+export type MeshParticleSystemOpts = ParticleSystemOpts &
 	CommonMeshEntityOpts & {
 		height: number
 		width: number
@@ -2564,11 +2669,16 @@ type MeshParticleSystemOpts = ParticleSystemOpts &
 		dir1?: number[]
 		dir2?: number[]
 	}
-type CosmeticType = (_TypeOf["cosmeticTypes"])[number]
-type CosmeticName = string
-type MobHerdId = number
-type MobType = (_TypeOf["mobTypes"])[number]
-type MobSpawnOpts<TMobType extends MobType> = Partial<{
+
+export type CosmeticType = (_TypeOf["cosmeticTypes"])[number]
+
+export type CosmeticName = string
+
+export type MobHerdId = number
+
+export type MobType = (_TypeOf["mobTypes"])[number]
+
+export type MobSpawnOpts<TMobType extends MobType> = Partial<{
 	mobHerdId: MobHerdId
 	spawnerId: PlayerId
 	mobDbId: MobDbId
@@ -2581,9 +2691,12 @@ type MobSpawnOpts<TMobType extends MobType> = Partial<{
 		collidesEntities: boolean
 	}>
 }>
-type MobVariation<TMobType extends MobType> = (_TypeOf["mobVariations"])[TMobType][number]
-type MobSetting = (_TypeOf["mobSettings"])[number]
-type MobSettings<TMobType extends MobType> = {
+
+export type MobVariation<TMobType extends MobType> = (_TypeOf["mobVariations"])[TMobType][number]
+
+export type MobSetting = (_TypeOf["mobSettings"])[number]
+
+export type MobSettings<TMobType extends MobType> = {
 	variation: MobVariation<TMobType>
 	name: string
 	maxHealth: number
@@ -2654,7 +2767,8 @@ type MobSettings<TMobType extends MobType> = {
 	runningRandomFacingInfo: PNull<MobRandomFacingInfo>
 	metaInfo: string
 }
-type MobItemDrop = Readonly<{
+
+export type MobItemDrop = Readonly<{
 	itemName: ItemName
 	probabilityOfDrop: number
 
@@ -2665,11 +2779,14 @@ type MobItemDrop = Readonly<{
 	// If true, the item will "burst" out of the mob rather than just dropping.
 	applyBurstImpulseToDrop?: boolean
 }>
-type MobBurstAttackInfo = Readonly<{
+
+export type MobBurstAttackInfo = Readonly<{
 	burstAttackIntervals: readonly number[]
 }>
-type MobArmour = Partial<Readonly<Record<ArmourPart, MobArmourPiece>>>
-type MobWarpTargetSpecialAttackInfo = Readonly<{
+
+export type MobArmour = Partial<Readonly<Record<ArmourPart, MobArmourPiece>>>
+
+export type MobWarpTargetSpecialAttackInfo = Readonly<{
 	cooldown: number
 	range: number
 	sound: PNull<string>
@@ -2679,17 +2796,20 @@ type MobWarpTargetSpecialAttackInfo = Readonly<{
 	swingArm: boolean
 	particleOpts: PNull<TempMobParticleOpts>
 }>
-type MobCombatTetherCombatInfo = Readonly<{
+
+export type MobCombatTetherCombatInfo = Readonly<{
 	range: number
 	particleOpts: MobParticleOpts
 }>
-type MobEvadeInfo = Readonly<{
+
+export type MobEvadeInfo = Readonly<{
 	probability: number
 	impulse: number
 	minAngle: number
 	maxAngle: number
 }>
-type MobChargeSpecialAttackInfo = Readonly<{
+
+export type MobChargeSpecialAttackInfo = Readonly<{
 	// Multiplier applied to the running speed during the straight dash. Defaults to 1.
 	chargeSpeedMult?: number
 	// Max heading error (radians) at which the mob is considered "facing" its target and may dash. Defaults to a small tolerance.
@@ -2697,7 +2817,8 @@ type MobChargeSpecialAttackInfo = Readonly<{
 	// Pose shown while dashing, reverted to the resting pose when the charge ends. Defaults to "zombie".
 	chargePose?: PlayerPose
 }>
-type MobTameInfo = {
+
+export type MobTameInfo = {
 	tameItemName: ItemName | readonly ItemName[]
 	probabilityOfTame: number
 	isSaddleable?: boolean
@@ -2712,7 +2833,8 @@ type MobTameInfo = {
 	commonDrops?: ItemName[]
 	levelUpBonuses?: LevelUpBonuses
 }
-type MobPetInfo = {
+
+export type MobPetInfo = {
 	friendshipPoints: number
 	lastFedAt: number
 	highestFriendshipLevelReached: MobFeedLevel
@@ -2720,12 +2842,14 @@ type MobPetInfo = {
 	superlikedFoodKnown: boolean
 	bonusesGained: readonly MobLevelUpBonus[]
 }
-type MobHealthRegenSettings = Readonly<{
+
+export type MobHealthRegenSettings = Readonly<{
 	amount: number
 	interval: number
 	startAfter: number
 }>
-type MobBridgeInfo = Readonly<{
+
+export type MobBridgeInfo = Readonly<{
 	// The block to place.
 	blockToPlace: BlockName
 	// If true, only place while stood on solid ground (decorates the surface walked over); if false, place
@@ -2741,7 +2865,8 @@ type MobBridgeInfo = Readonly<{
 	// If a |Decaying variant exists for `blockToPlace`, use it to turn blocks into air after `msToDecay` ms.
 	msToDecay?: number
 }>
-type MobSlideInfo = Readonly<{
+
+export type MobSlideInfo = Readonly<{
 	// Horizontal impulse at the start of a slide (initial speed = impulse / mass).
 	impulse: number
 	// Lowered friction the burst coasts on (below the mob's normal friction so it carries far), restored on end.
@@ -2751,11 +2876,13 @@ type MobSlideInfo = Readonly<{
 	// Rest (ms) after the coast ends before the next slide. Larger = fewer slides.
 	intervalBounds: Bounds
 }>
-type MobJumpInfo = Readonly<{
+
+export type MobJumpInfo = Readonly<{
 	// Rest (ms) between hops (a hop only fires once grounded). Larger = fewer hops.
 	intervalBounds: Bounds
 }>
-type MobRandomFacingInfo = Readonly<{
+
+export type MobRandomFacingInfo = Readonly<{
 	// Weighted offsets to pick from (via getWeightedRandom); `weight`s are non-negative,
 	// and at least one must be greater than 0. E.g. `[{ offset: Math.PI, weight: 2 },
 	// { offset: 0, weight: 1 }]` faces backwards twice as often as forwards.
@@ -2763,34 +2890,51 @@ type MobRandomFacingInfo = Readonly<{
 	// Bounds (ms) between re-rolls.
 	intervalBounds: Bounds
 }>
-type ArmourPart = (_TypeOf["armourPieces"])[number]
-type MobArmourPiece = Readonly<{
+
+export type ArmourPart = (_TypeOf["armourPieces"])[number]
+
+export type MobArmourPiece = Readonly<{
 	itemName: ItemName
 	enchantmentTier?: EnchantmentTier
 }>
-type TempMobParticleOpts = Readonly<{
+
+export type TempMobParticleOpts = Readonly<{
 	duration: number
 }> &
 	MobParticleOpts
-type MobParticleOpts = Readonly<Pick<MeshParticleSystemOpts, "texture" | "colorGradients">>
-type ItemNameWithEffects = { itemName: ItemName; effects: readonly Readonly<EffectOpts>[]; healAmt?: number }
-type LevelUpBonuses = RecursiveReadonly<Record<MobFeedLevelUpLevels, MobLevelUpBonus>>
-type EffectOpts = { name: PotionEffect; duration: number; level: number }
-type PotionEffect = (_TypeOf["potionEffects"])[number]
-type MobFeedLevelUpLevels = Exclude<MobFeedLevel, 0>
-type MobLevelUpBonus = (_TypeOf["mobLevelUpBonuses"])[number]
-type MobFeedLevel = InclusiveRange<_TypeOf["MAX_MOB_FEED_LEVEL"]>
-type InclusiveRange<N extends number, Arr extends number[] = []> = Arr["length"] extends N
+
+export type MobParticleOpts = Readonly<Pick<MeshParticleSystemOpts, "texture" | "colorGradients">>
+
+export type ItemNameWithEffects = { itemName: ItemName; effects: readonly Readonly<EffectOpts>[]; healAmt?: number }
+
+export type LevelUpBonuses = RecursiveReadonly<Record<MobFeedLevelUpLevels, MobLevelUpBonus>>
+
+export type EffectOpts = { name: PotionEffect; duration: number; level: number }
+
+export type PotionEffect = (_TypeOf["potionEffects"])[number]
+
+export type MobFeedLevelUpLevels = Exclude<MobFeedLevel, 0>
+
+export type MobLevelUpBonus = (_TypeOf["mobLevelUpBonuses"])[number]
+
+export type MobFeedLevel = InclusiveRange<_TypeOf["MAX_MOB_FEED_LEVEL"]>
+
+export type InclusiveRange<N extends number, Arr extends number[] = []> = Arr["length"] extends N
 	? Arr[number] | Arr["length"]
 	: InclusiveRange<N, [...Arr, Arr["length"]]>
-type Bounds = Readonly<MutableBounds>
-type MutableBounds = {
+
+export type Bounds = Readonly<MutableBounds>
+
+export type MutableBounds = {
 		min: number
 		max: number
 	}
-type MobAiState = (_TypeOf["mobAiStates"])[number]
-type MobAiStateParams<TState extends MobAiState> = MobWorldView[TState]
-type MobWorldView = {
+
+export type MobAiState = (_TypeOf["mobAiStates"])[number]
+
+export type MobAiStateParams<TState extends MobAiState> = MobWorldView[TState]
+
+export type MobWorldView = {
 	// The mob is stood still, but it still has awareness of its environment.
 	// For example: if the mob is hostile, it will still chase and attack nearby players.
 	idle: null
@@ -2828,7 +2972,8 @@ type MobWorldView = {
 	// It will stop if it is within the `stoppingRadius` (mob setting) of the position.
 	runningToPosition: { pos: Pos }
 }
-type MeshEntityPhysicsOpts = {
+
+export type MeshEntityPhysicsOpts = {
 	doPhysics: boolean
 	onCollideTerrain?: () => void // Unsupported for custom code
 	collidesEntities?: boolean
@@ -2837,20 +2982,25 @@ type MeshEntityPhysicsOpts = {
 	heightExpandAmt?: number // expand hitbox height by this amount
 	widthExpandAmt?: number // expand hitbox width by this amount
 }
-type QTEType = keyof QTEDefinitions
-type QTEClientParameters<T extends QTEType = QTEType> = {
+
+export type QTEType = keyof QTEDefinitions
+
+export type QTEClientParameters<T extends QTEType = QTEType> = {
 	type: T
 	parameters: QTEParametersForType<T>
 }
-type QTEParametersForType<T extends QTEType> = QTEDefinitions[T]["params"]
-interface QTEDefinitions {
+
+export type QTEParametersForType<T extends QTEType> = QTEDefinitions[T]["params"]
+
+export interface QTEDefinitions {
 	progressBar: { params: ProgressBarQteParams; state: ProgressBarQteState }
 	timedClick: { params: TimedClickQteParams; state: TimedClickQteState }
 	gravityBar: { params: GravityBarQteParams; state: GravityBarQteState }
 	precisionBar: { params: PrecisionBarQteParams; state: PrecisionBarQteState }
 	rhythmClick: { params: RhythmClickQteParams; state: RhythmClickQteState }
 }
-type ProgressBarQteParams = Readonly<{
+
+export type ProgressBarQteParams = Readonly<{
 	/** Starting progress value (0-100) @default 30 */
 	progressStartValue?: number
 	/** How much progress drains each tick while the player isn't clicking @default 0.075 */
@@ -2868,11 +3018,13 @@ type ProgressBarQteParams = Readonly<{
 	/** Rotation in degrees for the click icon (must be ≥ 0) @default 15 */
 	rotation?: number
 }>
-type ProgressBarQteState = {
+
+export type ProgressBarQteState = {
 	progress: number
 	clickCount: number
 }
-type TimedClickQteParams = Readonly<{
+
+export type TimedClickQteParams = Readonly<{
 	/** Duration in milliseconds the player has to click @default 3000 */
 	timeWindow: number
 	/** Icon displayed on the click target @default "fa-solid fa-computer-mouse" */
@@ -2888,11 +3040,13 @@ type TimedClickQteParams = Readonly<{
 	/** If true, the icon pulses with a breathing animation anchored to the centre @default false */
 	breatheCenter?: boolean
 }>
-type TimedClickQteState = {
+
+export type TimedClickQteState = {
 	timeRemaining: number
 	timeWindow: number
 }
-type GravityBarQteParams = Readonly<{
+
+export type GravityBarQteParams = Readonly<{
 	/** Starting progress value (0-100) @default 30 */
 	progressStartValue?: number
 	/** Size of the player's catch zone as a fraction of the bar (must be > 0, 0-1) @default 0.25 */
@@ -2916,14 +3070,16 @@ type GravityBarQteParams = Readonly<{
 	/** Icon displayed on the mover @default "Moonfish" */
 	icon?: string
 }>
-type GravityBarQteState = {
+
+export type GravityBarQteState = {
 	catchZonePosition: number
 	catchZoneSize: number
 	moverPosition: number
 	progress: number
 	isCatching: boolean
 }
-type PrecisionBarQteParams = Readonly<{
+
+export type PrecisionBarQteParams = Readonly<{
 	/** Speed of the marker in full bar-widths per second (must be > 0, e.g. 1.0 = one full sweep per second) @default 0.5 */
 	speed: number
 	/** Fraction of the bar that counts as the success zone, centred in the middle (must be > 0, 0-1, e.g. 0.15 = 15%) @default 0.15 */
@@ -2937,11 +3093,13 @@ type PrecisionBarQteParams = Readonly<{
 	/** Rotation in degrees for the icon (must be ≥ 0) @default 0 */
 	rotation?: number
 }>
-type PrecisionBarQteState = {
+
+export type PrecisionBarQteState = {
 	/** Marker position as 0–1 where 0.5 is the centre */
 	markerPosition: number
 }
-type RhythmClickQteParams = Readonly<{
+
+export type RhythmClickQteParams = Readonly<{
 	/** Number of successful clicks needed to complete the QTE (must be a positive integer) @default 5 */
 	requiredSuccesses: number
 	/** Duration in milliseconds for the outer circle to shrink from max size to centre (must be > 0) @default 1200 */
@@ -2955,7 +3113,8 @@ type RhythmClickQteParams = Readonly<{
 	/** Icon displayed in the centre of the circles @default "" */
 	icon?: string
 }>
-type RhythmClickQteState = {
+
+export type RhythmClickQteState = {
 	/** Current outer circle radius as a fraction of the max radius (1 = fully expanded, 0 = at centre) */
 	outerCircleProgress: number
 	/** Number of successful clicks so far */
@@ -2967,13 +3126,20 @@ type RhythmClickQteState = {
 	/** Result of the most recent click: null if no click yet, true if hit, false if miss */
 	lastClickResult: boolean | null
 }
-type QTERequestId = number
-type UiRequestId = number
-type IngameIconName = (_TypeOf["ingameIconNames"])[number]
-type InbuiltEffectInfo = { inbuiltLevel: number; initiatorId?: PlayerId }
-type PlayerPhysicsState<TPhysicsType extends PhysicsType> = Readonly<{ type: TPhysicsType; tier: PhysicsTier<TPhysicsType> }>
-type PhysicsTier<TPhysicsType extends PhysicsType> = PNull<PhysicsTiers[TPhysicsType]>
-type PhysicsTiers = {
+
+export type QTERequestId = number
+
+export type UiRequestId = number
+
+export type IngameIconName = (_TypeOf["ingameIconNames"])[number]
+
+export type InbuiltEffectInfo = { inbuiltLevel: number; initiatorId?: PlayerId }
+
+export type PlayerPhysicsState<TPhysicsType extends PhysicsType> = Readonly<{ type: TPhysicsType; tier: PhysicsTier<TPhysicsType> }>
+
+export type PhysicsTier<TPhysicsType extends PhysicsType> = PNull<PhysicsTiers[TPhysicsType]>
+
+export type PhysicsTiers = {
 	[PhysicsType.DEFAULT]: null
 	[PhysicsType.BOAT]: BoatTier
 	[PhysicsType.GLIDER]: GliderTier
@@ -2983,18 +3149,22 @@ type PhysicsTiers = {
 	[PhysicsType.CAR]: CarTier
 	[PhysicsType.HOVERCRAFT]: null
 }
-type AngleDir = {
+
+export type AngleDir = {
 	theta: number
 	phi: number
 }
-type BlockRaycastResult = PNull<{
+
+export type BlockRaycastResult = PNull<{
 	blockID: BlockId // The block ID of the block that was hit
 	position: Pos // The position of the block that was hit
 	normal: Pos // The normal of the face that was hit
 	adjacent: Pos // The position of the block adjacent to the hit face
 }>
-type MeshParticleSystemUpdates = Record<EntityId, Record<NodeName, MeshParticleSystemUpdate>>
-type MeshParticleSystemUpdate = {
+
+export type MeshParticleSystemUpdates = Record<EntityId, Record<NodeName, MeshParticleSystemUpdate>>
+
+export type MeshParticleSystemUpdate = {
 	particleSystemDir1?: number[]
 	particleSystemDir2?: number[]
 	particleSystemMinSize?: number
@@ -3002,7 +3172,8 @@ type MeshParticleSystemUpdate = {
 	particleSystemPlayingState?: boolean
 	particleSystemColorGradients?: TimeColorGradient[]
 }
-type UgcCurrencyInfo = {
+
+export type UgcCurrencyInfo = {
 	amount: number
 	icon: string
 	iconColour?: string
@@ -3010,11 +3181,16 @@ type UgcCurrencyInfo = {
 	hidden?: boolean
 	subtext?: string | CustomTextStyling
 }
-type UserCallbacks = "tick" | "onClose" | "onPlayerJoin" | "onPlayerLeave" | "onPlayerJump" | "onRespawnRequest" | "playerCommand" | "onPlayerChat" | "onPlayerChangeBlock" | "onBlockStand" | "onBlockStandStart" | "onBlockStandStop" | "onPlayerAttemptCraft" | "onPlayerCraft" | "onPlayerAttemptOpenChest" | "onPlayerOpenedChest" | "onPlayerMoveItemOutOfInventory" | "onPlayerDropItem" | "onPlayerPickedUpItem" | "onPlayerSelectInventorySlot" | "onPlayerAttack" | "onPlayerDamagingOtherPlayer" | "onPlayerDamagingMob" | "onMobDamagingPlayer" | "onMobDamagingOtherMob" | "onAttemptKillPlayer" | "onPlayerKilledOtherPlayer" | "onMobKilledPlayer" | "onPlayerKilledMob" | "onMobKilledOtherMob" | "onPlayerPotionEffect" | "onPlayerDamagingMeshEntity" | "onPlayerBreakMeshEntity" | "onPlayerUsedThrowable" | "onPlayerThrowableHitTerrain" | "onTouchscreenActionButton" | "onPlayerMoveInvenItem" | "onPlayerMoveItemIntoIdxs" | "onPlayerSwapInvenSlots" | "onPlayerMoveInvenItemWithAmt" | "onPlayerAttemptAltAction" | "onPlayerAltAction" | "onPlayerClick" | "onPlayerClickUp" | "onClientOptionUpdated" | "onMobSettingUpdated" | "onInventoryUpdated" | "onChestUpdated" | "onWorldChangeBlock" | "onCreateBloxdMeshEntity" | "onEntityCollision" | "onPlayerAttemptSpawnMob" | "onWorldAttemptSpawnMob" | "onPlayerSpawnMob" | "onWorldSpawnMob" | "onWorldAttemptDespawnMob" | "onMobDespawned" | "onChunkLoaded" | "onPlayerRequestChunk" | "onItemDropCreated" | "onPlayerStartChargingItem" | "onPlayerFinishChargingItem" | "onPlayerFinishQTE" | "onPlayerToggledShopMenu" | "onPlayerBoughtShopItem" | "onPlayerPlayedEmote" | "onPlayerEnteredVehicle" | "onPlayerExitedVehicle" | "onUiRequestResponded" | "doPeriodicSave"
-type WorldGamemode = (_TypeOf["worldGamemodes"])[number]
-type QueuedCommandId = string
-type QueuedStatusString = (_TypeOf["QUEUED_COMMAND_STATUS_STRINGS"])[keyof _TypeOf["QUEUED_COMMAND_STATUS_STRINGS"]]
-type UiRequestClientParameters = {
+
+export type UserCallbacks = "tick" | "onClose" | "onPlayerJoin" | "onPlayerLeave" | "onPlayerJump" | "onRespawnRequest" | "playerCommand" | "onPlayerChat" | "onPlayerChangeBlock" | "onBlockStand" | "onBlockStandStart" | "onBlockStandStop" | "onPlayerAttemptCraft" | "onPlayerCraft" | "onPlayerAttemptOpenChest" | "onPlayerOpenedChest" | "onPlayerMoveItemOutOfInventory" | "onPlayerDropItem" | "onPlayerPickedUpItem" | "onPlayerSelectInventorySlot" | "onPlayerAttack" | "onPlayerDamagingOtherPlayer" | "onPlayerDamagingMob" | "onMobDamagingPlayer" | "onMobDamagingOtherMob" | "onAttemptKillPlayer" | "onPlayerKilledOtherPlayer" | "onMobKilledPlayer" | "onPlayerKilledMob" | "onMobKilledOtherMob" | "onPlayerPotionEffect" | "onPlayerDamagingMeshEntity" | "onPlayerBreakMeshEntity" | "onPlayerUsedThrowable" | "onPlayerThrowableHitTerrain" | "onTouchscreenActionButton" | "onPlayerMoveInvenItem" | "onPlayerMoveItemIntoIdxs" | "onPlayerSwapInvenSlots" | "onPlayerMoveInvenItemWithAmt" | "onPlayerAttemptAltAction" | "onPlayerAltAction" | "onPlayerClick" | "onPlayerClickUp" | "onClientOptionUpdated" | "onMobSettingUpdated" | "onInventoryUpdated" | "onChestUpdated" | "onWorldChangeBlock" | "onCreateBloxdMeshEntity" | "onEntityCollision" | "onPlayerAttemptSpawnMob" | "onWorldAttemptSpawnMob" | "onPlayerSpawnMob" | "onWorldSpawnMob" | "onWorldAttemptDespawnMob" | "onMobDespawned" | "onChunkLoaded" | "onPlayerRequestChunk" | "onItemDropCreated" | "onPlayerStartChargingItem" | "onPlayerFinishChargingItem" | "onPlayerFinishQTE" | "onPlayerToggledShopMenu" | "onPlayerBoughtShopItem" | "onPlayerPlayedEmote" | "onPlayerEnteredVehicle" | "onPlayerExitedVehicle" | "onUiRequestResponded" | "doPeriodicSave"
+
+export type WorldGamemode = (_TypeOf["worldGamemodes"])[number]
+
+export type QueuedCommandId = string
+
+export type QueuedStatusString = (_TypeOf["QUEUED_COMMAND_STATUS_STRINGS"])[keyof _TypeOf["QUEUED_COMMAND_STATUS_STRINGS"]]
+
+export type UiRequestClientParameters = {
 	type: "standard" | "rewardedAd"
 	title: string | CustomTextStyling
 	icons?: string[]
@@ -3023,17 +3199,23 @@ type UiRequestClientParameters = {
 	successText?: string | CustomTextStyling
 	autoDismissAfterMs?: number
 }
-type MultiBlockInfo = {
+
+export type MultiBlockInfo = {
 	positions: { block: string; id: number; x: number; y: number; z: number }[]
 }
-type MeshEntityVehicleType = (_TypeOf["meshEntityVehiclesTypes"])[number]
-type BoughtShopItem = Omit<ShopItem, "boughtCallback" | "schematicId" | "isRewardedAd">
-type OnPlayerChatObjectResponse = Record<PlayerId, false | ChatMessageObject>
-type ChatMessageObject = {
+
+export type MeshEntityVehicleType = (_TypeOf["meshEntityVehiclesTypes"])[number]
+
+export type BoughtShopItem = Omit<ShopItem, "boughtCallback" | "schematicId" | "isRewardedAd">
+
+export type OnPlayerChatObjectResponse = Record<PlayerId, false | ChatMessageObject>
+
+export type ChatMessageObject = {
 	prefixContent?: ChatTags
 	chatContent?: CustomTextStyling
 }
-interface _TypeOf {
+
+export interface _TypeOf {
 	lifeformBodyParts: readonly ["Torso", "Head", "ArmRight", "ArmLeft", "LegLeft", "LegRight"]
 	enchantmentPerks: readonly ["Damage", "Attack Speed", "Critical Damage", "Protection", "Health", "Health Regen", "Stomp Damage", "Knockback Resist", "Arrow Speed", "Arrow Damage", "Quick Charge", "Break Speed", "Momentum", "Mining Yield", "Farming Yield", "Mining Aura", "Digging Aura", "Lumber Aura", "Farming Aura", "Horizontal Knockback", "Vertical Knockback"]
 	enchantmentTiers: readonly ["Tier 1", "Tier 2", "Tier 3", "Tier 4", "Tier 5"]
@@ -3047,11 +3229,11 @@ interface _TypeOf {
 	particlePresets: { readonly damageInner: unknown; readonly damageOuter: unknown; readonly bouncinessInner: unknown; readonly bouncinessOuter: unknown; readonly healthRegenInner: unknown; readonly healthRegenOuter: unknown; readonly speedInner: unknown; readonly speedOuter: unknown; readonly damageReductionInner: unknown; readonly damageReductionOuter: unknown; readonly invisibleInner: unknown; readonly invisibleOuter: unknown; readonly jumpBoostInner: unknown; readonly jumpBoostOuter: unknown; readonly knockbackInner: unknown; readonly knockbackOuter: unknown; readonly poisonedInner: unknown; readonly poisonedOuter: unknown; readonly slownessInner: unknown; readonly slownessOuter: unknown; readonly weaknessInner: unknown; readonly weaknessOuter: unknown; readonly cleansedInner: unknown; readonly cleansedOuter: unknown; readonly instantDamageInner: unknown; readonly instantDamageOuter: unknown; readonly instantHealthInner: unknown; readonly instantHealthOuter: unknown; readonly hasteInner: unknown; readonly hasteOuter: unknown; readonly shieldInner: unknown; readonly shieldOuter: unknown; readonly doubleJumpInner: unknown; readonly doubleJumpOuter: unknown; readonly heatResistanceInner: unknown; readonly heatResistanceOuter: unknown; readonly thiefInner: unknown; readonly thiefOuter: unknown; readonly miningYieldInner: unknown; readonly miningYieldOuter: unknown; readonly brainRotInner: unknown; readonly brainRotOuter: unknown; readonly auraInner: unknown; readonly auraOuter: unknown; readonly wallClimbingInner: unknown; readonly wallClimbingOuter: unknown; readonly airWalkInner: unknown; readonly airWalkOuter: unknown; readonly pickpocketerInner: unknown; readonly pickpocketerOuter: unknown; readonly lifestealInner: unknown; readonly lifestealOuter: unknown; readonly blindnessInner: unknown; readonly blindnessOuter: unknown; readonly poopyInner: unknown; readonly poopyOuter: unknown; readonly glowingInner: unknown; readonly glowingOuter: unknown; readonly nightVisionInner: unknown; readonly nightVisionOuter: unknown; readonly xRayVisionInner: unknown; readonly xRayVisionOuter: unknown; readonly defaultFirecrackerSmall: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly defaultFirecrackerLarge: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mango: unknown; readonly yellowFirecrackerSmall: unknown; readonly yellowFirecrackerLarge: unknown; readonly limeFirecrackerSmall: unknown; readonly limeFirecrackerLarge: unknown; readonly greenFirecrackerSmall: unknown; readonly greenFirecrackerLarge: unknown; readonly cyanFirecrackerSmall: unknown; readonly cyanFirecrackerLarge: unknown; readonly blueFirecrackerSmall: unknown; readonly blueFirecrackerLarge: unknown; readonly purpleFirecrackerSmall: unknown; readonly purpleFirecrackerLarge: unknown; readonly pinkFirecrackerSmall: unknown; readonly pinkFirecrackerLarge: unknown; readonly redFirecrackerSmall: unknown; readonly redFirecrackerLarge: unknown; readonly orangeFirecrackerSmall: unknown; readonly orangeFirecrackerLarge: unknown; readonly blackFirecrackerSmall: unknown; readonly blackFirecrackerLarge: unknown; readonly brownFirecrackerSmall: unknown; readonly brownFirecrackerLarge: unknown; readonly grayFirecrackerSmall: unknown; readonly grayFirecrackerLarge: unknown; readonly lightBlueFirecrackerSmall: unknown; readonly lightBlueFirecrackerLarge: unknown; readonly lightGrayFirecrackerSmall: unknown; readonly lightGrayFirecrackerLarge: unknown; readonly magentaFirecrackerSmall: unknown; readonly magentaFirecrackerLarge: unknown; readonly whiteFirecrackerSmall: unknown; readonly whiteFirecrackerLarge: unknown; readonly brainRot: unknown; readonly stomp: unknown; readonly fertiliser: unknown; readonly bonemeal: unknown; readonly mobTameSuccess: unknown; readonly mobTameFailure: unknown; readonly mobCatch: unknown; readonly spawnCaughtMob: unknown; readonly mobFeedDefault: unknown; readonly mobFeedSuperliked: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobFeedLike: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobFeedNeutral: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobFeedDisliked: { readonly colorGradients: TimeColorGradient[]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobDeath: unknown; readonly mobDeathSoul: unknown; readonly boardShopSuccess: unknown; readonly mobSpawnerBlockFail: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [80, 80, 80, 1]; readonly maxColor: [160, 160, 160, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobSpawnerBlockPassive: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [0, 200, 50, 1]; readonly maxColor: [0, 255, 100, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobSpawnerBlockNeutral: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [200, 200, 0, 1]; readonly maxColor: [255, 255, 0, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobSpawnerBlockHostile: { readonly colorGradients: [{ readonly timeFraction: 0; readonly minColor: [200, 10, 0, 1]; readonly maxColor: [255, 20, 0, 1]; }]; readonly texture: string; readonly minLifeTime: number; readonly maxLifeTime: number; readonly minEmitPower: number; readonly maxEmitPower: number; readonly minSize: number; readonly maxSize: number; readonly gravity: number[]; readonly velocityGradients: VelocityGradient[]; readonly blendMode: ParticleSystemBlendMode; readonly dir1: number[]; readonly dir2: number[]; readonly manualEmitCount: number; readonly hideDist: number; }; readonly mobSpawnOrb: unknown; readonly aura: unknown; }
 	gunCategories: readonly ["semi_automatic", "submachine", "rifle", "pistol", "shotgun"]
 	customItemStats: readonly ["ttb", "displayName", "harvestLevel", "stoodOnSpeedMultiplier", "specialToolDrop", "specialToolBonusDrops", "description", "altActionable", "eatHealAmt", "eatShieldAmt", "damage", "attackRange", "attackCooldownMs", "secondaryDamage", "absorbThrowable", "armourReduction", "CrosshairText", "gunStats", "showInCreativeInven"]
-	lifeformTypes: readonly ["Player", "Pig", "Cow", "Sheep", "Horse", "Deer", "Slime", "Wolf", "Wildcat", "Spirit Golem", "Spirit Wolf", "Spirit Bear", "Spirit Stag", "Spirit Gorilla", "Bear", "Stag", "Gold Watermelon Stag", "Gorilla", "Cave Golem", "Draugr Zombie", "Draugr Skeleton", "Frost Golem", "Frost Zombie", "Frost Skeleton", "Draugr Knight", "Draugr Huntress", "Magma Golem", "Draugr Warper", "Frost Wraith", "Draugr Reaver", "Stalker", "Crone", "NPC", "67", "Bobino Musculino", "Capitano Explovissimo"]
+	lifeformTypes: readonly ["Player", "Pig", "Cow", "Sheep", "Horse", "Deer", "Slime", "Wolf", "Wildcat", "Spirit Golem", "Spirit Wolf", "Spirit Bear", "Spirit Stag", "Spirit Gorilla", "Bear", "Stag", "Gold Watermelon Stag", "Gorilla", "Cave Golem", "Draugr Zombie", "Draugr Skeleton", "Frost Golem", "Frost Zombie", "Frost Skeleton", "Draugr Knight", "Draugr Huntress", "Magma Golem", "Draugr Warper", "Frost Wraith", "Draugr Reaver", "Stalker", "Crone", "Iron Guardian", "Gold Guardian", "Diamond Guardian", "Moonstone Guardian", "NPC", "67", "Bobino Musculino", "Capitano Explovissimo"]
 	cosmeticTypes: readonly ["skin", "hat", "head", "eyebrows", "eyes", "back", "body", "legs", "shoes", "cape", "nameColour", "profileEffect", "emote"]
 	playerPoses: readonly ["standing", "sitting", "zombie", "gliding", "driving", "sleeping", "riding"]
-	mobVariations: { readonly Pig: readonly ["default"]; readonly Cow: readonly ["default", "cream"]; readonly Sheep: readonly ["default", "black", "red", "orange", "pink", "purple", "yellow", "blue", "brown", "cyan", "gray", "green", "lightBlue", "lightGray", "lime", "magenta"]; readonly Horse: readonly ["default", "black", "brown", "cream"]; readonly Slime: readonly ["default"]; readonly "Cave Golem": readonly ["default", "iron", "corrupted"]; readonly "Draugr Zombie": readonly ["default", "longHairChestplate", "longHairClothed", "shortHairClothed", "flower", "flower2", "mushroom", "vine", "vine2", "corrupted", "corrupted2"]; readonly "Draugr Skeleton": readonly ["default"]; readonly "Frost Golem": readonly ["default"]; readonly "Frost Zombie": readonly ["default", "longHairChestplate", "shortHairClothed"]; readonly "Frost Skeleton": readonly ["default"]; readonly "Draugr Knight": readonly ["default"]; readonly Wolf: readonly ["default", "white", "brown", "grey", "spectral"]; readonly Bear: readonly ["default"]; readonly Deer: readonly ["default"]; readonly Stag: readonly ["default"]; readonly "Gold Watermelon Stag": readonly ["default"]; readonly Gorilla: readonly ["default"]; readonly Wildcat: readonly ["default", "tabby", "grey", "black", "calico", "siamese", "leopard"]; readonly "Magma Golem": readonly ["default"]; readonly "Draugr Huntress": readonly ["default", "chainmail"]; readonly "Spirit Golem": readonly ["default"]; readonly "Spirit Wolf": readonly ["default"]; readonly "Spirit Bear": readonly ["default"]; readonly "Spirit Stag": readonly ["default"]; readonly "Spirit Gorilla": readonly ["default"]; readonly "Draugr Warper": readonly ["default"]; readonly "Frost Wraith": readonly ["default"]; readonly "Draugr Reaver": readonly ["default"]; readonly Stalker: readonly ["default", "crimson", "frost", "void"]; readonly Crone: readonly ["default"]; readonly NPC: readonly ["default", "emma", "leo", "isabel", "sanjay", "imara", "enoch", "sara", "carmen"]; readonly "67": readonly ["default"]; readonly "Bobino Musculino": readonly ["default"]; readonly "Capitano Explovissimo": readonly ["default"]; }
-	mobTypes: readonly ["Pig", "Cow", "Sheep", "Horse", "Deer", "Slime", "Wolf", "Wildcat", "Spirit Golem", "Spirit Wolf", "Spirit Bear", "Spirit Stag", "Spirit Gorilla", "Bear", "Stag", "Gold Watermelon Stag", "Gorilla", "Cave Golem", "Draugr Zombie", "Draugr Skeleton", "Frost Golem", "Frost Zombie", "Frost Skeleton", "Draugr Knight", "Draugr Huntress", "Magma Golem", "Draugr Warper", "Frost Wraith", "Draugr Reaver", "Stalker", "Crone", "NPC", "67", "Bobino Musculino", "Capitano Explovissimo"]
+	mobVariations: { readonly Pig: readonly ["default"]; readonly Cow: readonly ["default", "cream"]; readonly Sheep: readonly ["default", "black", "red", "orange", "pink", "purple", "yellow", "blue", "brown", "cyan", "gray", "green", "lightBlue", "lightGray", "lime", "magenta"]; readonly Horse: readonly ["default", "black", "brown", "cream"]; readonly Slime: readonly ["default"]; readonly "Cave Golem": readonly ["default", "iron", "corrupted"]; readonly "Draugr Zombie": readonly ["default", "longHairChestplate", "longHairClothed", "shortHairClothed", "flower", "flower2", "mushroom", "vine", "vine2", "corrupted", "corrupted2"]; readonly "Draugr Skeleton": readonly ["default"]; readonly "Frost Golem": readonly ["default"]; readonly "Frost Zombie": readonly ["default", "longHairChestplate", "shortHairClothed"]; readonly "Frost Skeleton": readonly ["default"]; readonly "Draugr Knight": readonly ["default"]; readonly Wolf: readonly ["default", "white", "brown", "grey", "spectral"]; readonly Bear: readonly ["default"]; readonly Deer: readonly ["default"]; readonly Stag: readonly ["default"]; readonly "Gold Watermelon Stag": readonly ["default"]; readonly Gorilla: readonly ["default"]; readonly Wildcat: readonly ["default", "tabby", "grey", "black", "calico", "siamese", "leopard"]; readonly "Magma Golem": readonly ["default"]; readonly "Draugr Huntress": readonly ["default", "chainmail"]; readonly "Spirit Golem": readonly ["default"]; readonly "Spirit Wolf": readonly ["default"]; readonly "Spirit Bear": readonly ["default"]; readonly "Spirit Stag": readonly ["default"]; readonly "Spirit Gorilla": readonly ["default"]; readonly "Draugr Warper": readonly ["default"]; readonly "Frost Wraith": readonly ["default"]; readonly "Draugr Reaver": readonly ["default"]; readonly Stalker: readonly ["default", "crimson", "frost", "void"]; readonly Crone: readonly ["default"]; readonly "Iron Guardian": readonly ["default"]; readonly "Gold Guardian": readonly ["default"]; readonly "Diamond Guardian": readonly ["default"]; readonly "Moonstone Guardian": readonly ["default"]; readonly NPC: readonly ["default", "emma", "leo", "isabel", "sanjay", "imara", "enoch", "sara", "carmen"]; readonly "67": readonly ["default"]; readonly "Bobino Musculino": readonly ["default"]; readonly "Capitano Explovissimo": readonly ["default"]; }
+	mobTypes: readonly ["Pig", "Cow", "Sheep", "Horse", "Deer", "Slime", "Wolf", "Wildcat", "Spirit Golem", "Spirit Wolf", "Spirit Bear", "Spirit Stag", "Spirit Gorilla", "Bear", "Stag", "Gold Watermelon Stag", "Gorilla", "Cave Golem", "Draugr Zombie", "Draugr Skeleton", "Frost Golem", "Frost Zombie", "Frost Skeleton", "Draugr Knight", "Draugr Huntress", "Magma Golem", "Draugr Warper", "Frost Wraith", "Draugr Reaver", "Stalker", "Crone", "Iron Guardian", "Gold Guardian", "Diamond Guardian", "Moonstone Guardian", "NPC", "67", "Bobino Musculino", "Capitano Explovissimo"]
 	mobSettings: readonly ["variation", "name", "maxHealth", "initialHealth", "idleSound", "attackSound", "secondaryAttackSound", "hurtSound", "onDeathItemDrops", "onDeathParticleTexture", "onDeathAura", "baseWalkingSpeed", "baseRunningSpeed", "walkingSpeedMultiplier", "runningSpeedMultiplier", "jumpCount", "baseJumpImpulseXZ", "baseJumpImpulseY", "jumpMultiplier", "runAwayRadius", "chaseRadius", "territoryRadius", "hostilityRadius", "stoppingRadius", "attackInterval", "attackRadius", "secondaryAttackRadius", "attackDamage", "secondaryAttackDamage", "isReceivingDamageCooldownGlobal", "knockbackReceivedMultiplier", "attackImpulse", "secondaryAttackImpulse", "rangedAttackInaccuracy", "burstAttackInfo", "secondaryBurstAttackInfo", "heldItemName", "heldItemEnchantmentTier", "armour", "attackItemName", "secondaryAttackItemName", "swingArmOnAttack", "swingArmOnSecondaryAttack", "attackEffectName", "attackEffectDuration", "warpTargetSpecialAttackInfo", "combatTetherInfo", "evadeInfo", "chargeSpecialAttackInfo", "tameInfo", "onTamedHealthMultiplier", "petInfo", "ownerDbId", "minFollowingRadius", "maxFollowingRadius", "isRideable", "healthRegen", "ridingSpeedMult", "bridgeInfo", "walkingSlideInfo", "runningSlideInfo", "walkingJumpInfo", "runningJumpInfo", "walkingRandomFacingInfo", "runningRandomFacingInfo", "metaInfo"]
 	armourPieces: readonly ["Helmet", "Chestplate", "Gauntlets", "Leggings", "Boots"]
 	potionEffects: readonly ["Speed", "Damage Reduction", "Damage", "Invisible", "Jump Boost", "Knockback", "Poisoned", "Slowness", "Weakness", "Cleansed", "Instant Damage", "Health Regen", "Instant Health", "Haste", "Shield", "Double Jump", "Heat Resistance", "Thief", "X-Ray Vision", "Mining Yield", "Brain Rot", "Aura", "Wall Climbing", "Air Walk", "Pickpocketer", "Lifesteal", "Bounciness", "Blindness", "Poopy", "Glowing", "Night Vision"]
@@ -3257,24 +3439,40 @@ interface _TypeOf {
 		setUnderlying(idx: number, id: BlockId): void
 	}
 }
-type ItemMetaInfo = _TypeOf["ItemMetaInfo"]
-type BlockMetadataItem = _TypeOf["BlockMetadataItem"]
-type NonBlockMetadataItem = _TypeOf["NonBlockMetadataItem"]
-type LoadedChunk = _TypeOf["LoadedChunk"]
-type Song = "Adigold - A Place To Be Free" | "Adigold - Butterfly Effect" | "Adigold - Dreamless Sleep" | "Adigold - Frozen Pulse" | "Adigold - Frozen Skies" | "Adigold - Healing Thoughts" | "Adigold - Here Forever" | "Adigold - Just a Little Hope" | "Adigold - Just Like Heaven" | "Adigold - Memories Remain" | "Adigold - Place To Be" | "Adigold - The Riverside" | "Adigold - The Wonder" | "Adigold - Vetrar (Cut B)" | "Awkward Comedy Quirky" | "battle-ship-111902" | "cdk-Silence-Await" | "corsairs-studiokolomna-main-version-23542-02-33" | "ghost-Reverie-small-theme" | "happy" | "Heroic-Demise-New" | "I-am-the-Sea-The-Room-4" | "Juhani Junkala [Retro Game Music Pack] Ending" | "Juhani Junkala [Retro Game Music Pack] Level 1" | "Juhani Junkala [Retro Game Music Pack] Level 2" | "Juhani Junkala [Retro Game Music Pack] Level 3" | "Juhani Junkala [Retro Game Music Pack] Title Screen" | "LonePeakMusic-Highway-1" | "Mojo Productions - Pirates" | "Mojo Productions - Sneaky Jazz" | "Mojo Productions - The Sneaky" | "Mojo Productions - The Sneaky Jazz" | "progress" | "raise-the-sails-152124" | "ramblinglibrarian-I-Have-Often-T" | "Slow-Motion-Bensound" | "snowflake-Ethereal-Space" | "the-epic-adventure-131399" | "TownTheme" | "The Suspense Ambient" | "Epic1" | "Epic2" | "Emotional Epic" | "Enemy Marked"
-type ParticleSystemBlendMode = 0 | 1 | 2 | 3 | 4
-type HalfblockPlacement = 0 | 1 | 2
-type WalkThroughType = 0 | 1 | 2
-type LobbyType = 0 | 1 | 2
-type PhysicsType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
-type BoatTier = 0 | 1 | 2
-type GliderTier = 0 | 1 | 2 | 3
-type BalloonTier = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15
-type SleepingTier = 0 | 1 | 2 | 3
-type CarTier = 0 | 1 | 2
-type ExplosionType = 0 | 1 | 2
 
-	type ClientOptions = {
+export type ItemMetaInfo = _TypeOf["ItemMetaInfo"]
+
+export type BlockMetadataItem = _TypeOf["BlockMetadataItem"]
+
+export type NonBlockMetadataItem = _TypeOf["NonBlockMetadataItem"]
+
+export type LoadedChunk = _TypeOf["LoadedChunk"]
+
+export type Song = "Adigold - A Place To Be Free" | "Adigold - Butterfly Effect" | "Adigold - Dreamless Sleep" | "Adigold - Frozen Pulse" | "Adigold - Frozen Skies" | "Adigold - Healing Thoughts" | "Adigold - Here Forever" | "Adigold - Just a Little Hope" | "Adigold - Just Like Heaven" | "Adigold - Memories Remain" | "Adigold - Place To Be" | "Adigold - The Riverside" | "Adigold - The Wonder" | "Adigold - Vetrar (Cut B)" | "Awkward Comedy Quirky" | "battle-ship-111902" | "cdk-Silence-Await" | "corsairs-studiokolomna-main-version-23542-02-33" | "ghost-Reverie-small-theme" | "happy" | "Heroic-Demise-New" | "I-am-the-Sea-The-Room-4" | "Juhani Junkala [Retro Game Music Pack] Ending" | "Juhani Junkala [Retro Game Music Pack] Level 1" | "Juhani Junkala [Retro Game Music Pack] Level 2" | "Juhani Junkala [Retro Game Music Pack] Level 3" | "Juhani Junkala [Retro Game Music Pack] Title Screen" | "LonePeakMusic-Highway-1" | "Mojo Productions - Pirates" | "Mojo Productions - Sneaky Jazz" | "Mojo Productions - The Sneaky" | "Mojo Productions - The Sneaky Jazz" | "progress" | "raise-the-sails-152124" | "ramblinglibrarian-I-Have-Often-T" | "Slow-Motion-Bensound" | "snowflake-Ethereal-Space" | "the-epic-adventure-131399" | "TownTheme" | "The Suspense Ambient" | "Epic1" | "Epic2" | "Emotional Epic" | "Enemy Marked"
+
+export type ParticleSystemBlendMode = 0 | 1 | 2 | 3 | 4
+
+export type HalfblockPlacement = 0 | 1 | 2
+
+export type WalkThroughType = 0 | 1 | 2
+
+export type LobbyType = 0 | 1 | 2
+
+export type PhysicsType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+
+export type BoatTier = 0 | 1 | 2
+
+export type GliderTier = 0 | 1 | 2 | 3
+
+export type BalloonTier = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15
+
+export type SleepingTier = 0 | 1 | 2 | 3
+
+export type CarTier = 0 | 1 | 2
+
+export type ExplosionType = 0 | 1 | 2
+
+export type ClientOptions = {
 		canChange: boolean
 		speedMultiplier: number
 		crouchingSpeed: number
@@ -3319,6 +3517,8 @@ type ExplosionType = 0 | 1 | 2
 		middleTextLower: string | CustomTextStyling | TextWithDisplayOptions
 		/** A row of compact chips rendered in the top-left HUD strip, concatenated immediately after the FPS counter / coordinates / room name. */
 		headerChips: HeaderChip[]
+		/** Lobby-only subtitle shown after the custom game name in the top-left header */
+		customVariationTitle: string
 		RightInfoText: string | CustomTextStyling | TextWithDisplayOptions
 		crosshairText: string | CustomTextStyling
 		/** If set, clients will only be able to see the closest x players (good for client perf in games with many players) */
@@ -3469,7 +3669,8 @@ type ExplosionType = 0 | 1 | 2
 		/** Renders a terrain-following strip of animated chevron arrows on the ground from this player to the target position. Optional `colour` is any CSS colour string (e.g. "red", "#ffaa00", "rgb(255,0,0)"), or null for default white. */
 		groundArrowPath: { target: [number, number, number]; colour?: string; }
 	}
-type OtherEntitySettings = {
+
+export type OtherEntitySettings = {
 		opacity: number
 		zIndex: 0 | 1
 		overlayColour: string
@@ -3487,551 +3688,792 @@ type OtherEntitySettings = {
 		nameColour: "default" | "yellow" | "lime" | "green" | "aqua" | "cyan" | "blue" | "purple" | "pink" | "red" | "orange"
 	}
 
-/**
- * Called every tick, 20 times per second
- * @param ms - The fixed timestep, can be used as "milliseconds since last tick"
- */
-declare var tick: (ms: number) => void
-
-/**
- * Called when the lobby is shutting down
- * @param serverIsShuttingDown - Whether the server is shutting down
- */
-declare var onClose: (serverIsShuttingDown: boolean) => void
-
-/**
- * Called when a player joins the lobby
- * @param playerId - The id of the player that joined
- * @param fromGameReset - Whether this call is from a game reset (used by SessionBasedGame)
- */
-declare var onPlayerJoin: (playerId: string, fromGameReset: boolean) => void
-
-/**
- * Called when a player leaves the lobby
- * @param playerId - The id of the player that left
- * @param serverIsShuttingDown - Whether the server is shutting down
- */
-declare var onPlayerLeave: (playerId: string, serverIsShuttingDown: boolean) => void
-
-/**
- * Called when a player jumps
- * @param playerId - The id of the player that jumped
- */
-declare var onPlayerJump: (playerId: string) => void
-
-/**
- * Called when a player requests to respawn.
- * Optionally return the respawn location. Defaults to [0, 0, 0].
- * Return true to handle yourself (good for async,
- * but be careful that the player isn't at the place they died,
- * as they could pick up their old items or hit the player they were fighting).
- * @param playerId - The id of the player that requested to respawn
- */
-declare var onRespawnRequest: (playerId: string) => true | void | number[]
-
-/**
- * Called when a player sends a command
- * @param playerId - The id of the player that sent the command
- * @param command - The command that the player sent
- */
-declare var playerCommand: (playerId: string, command: string) => boolean
-
-/**
- * Called when a player sends a chat message
- * Return false or null to prevent the broadcast of the message.
- * Return a string or CustomTextStyling to add a prefix to message.
- * Return for most flexibility: an object where keys are playerIds -
- * the value for a playerId being false means that player won't receive the message.
- * Otherwise playerId values should be an object with (optional) keys
- * prefixContent and chatContent to modify the prefix and the chat.
- * CustomTextStyling[] prefixContent is expected, e.g. [["prefix"]] or [[{ str: "prefix" }]].
- * World code is not permitted to specify chatContent, it will be ignored.
- * @param playerId - The id of the player that sent the message
- * @param chatMessage - The message that the player sent
- * @param channelName - The name of the channel that the message was sent in
- */
-declare var onPlayerChat: (playerId: PlayerId, chatMessage: string, channelName?: string) => boolean | void | ChatTags | OnPlayerChatObjectResponse
-
-/**
- * Called when a player changes a block
- * Return "preventChange" to prevent the change.
- * If player places block, fromBlock will be Air (and toBlock the block).
- * If a player breaks a block, toBlock will be Air.
- * Return "preventDrop" to prevent a block item from dropping.
- * Return an array to set the dropped item position.
- */
-declare var onPlayerChangeBlock: (playerId: PlayerId, x: number, y: number, z: number, fromBlock: BlockName, toBlock: BlockName, droppedItem: BlockName | null, fromBlockInfo: MultiBlockInfo, toBlockInfo: MultiBlockInfo) => void | "preventChange" | "preventDrop" | [number, number, number]
-
-/**
- * Called when a player drops an item
- * Return "preventDrop" to prevent the player from dropping the item at all.
- * Return "allowButNoDroppedItemCreated" to allow discarding items without dropping them.
- */
-declare var onPlayerDropItem: (playerId: PlayerId, x: number, y: number, z: number, itemName: ItemName, itemAmount: number, fromIdx: number) => void | "preventDrop" | "allowButNoDroppedItemCreated"
-
-/**
- * Called when a player picks up an item
- * @param playerId - The id of the player that picked up the item
- * @param itemName - The name of the item that was picked up
- * @param itemAmount - The amount of the item that was picked up
- * @param itemEntityId - The entityId of the item that was picked up
- */
-declare var onPlayerPickedUpItem: (playerId: PlayerId, itemName: string, itemAmount: number, itemEntityId: EntityId) => void
-
-/**
- * Called when a player selects a different inventory slot.
- * This will be called eventually when you have already set the slot using
- * api.setSelectedInventorySlotI so be careful not to cause an infinite loop doing this.
- * @param playerId - The id of the player that selected the inventory slot
- * @param slotIndex - The index of the inventory slot that was selected
- */
-declare var onPlayerSelectInventorySlot: (playerId: PlayerId, slotIndex: number) => void
-
-/**
- * Called when a player stands on a block
- * @param playerId - The id of the player that stood on the block
- * @param x - The x coordinate of the block that was stood on
- * @param y - The y coordinate of the block that was stood on
- * @param z - The z coordinate of the block that was stood on
- * @param blockName - The name of the block that was stood on
- */
-declare var onBlockStand: (playerId: PlayerId, x: number, y: number, z: number, blockName: BlockName) => void
-
-/**
- * Called when a player enters a block. Only called once per block until the player leaves the block.
- * @param playerId - The id of the player that entered the block
- * @param x - The x coordinate of the block that was entered
- * @param y - The y coordinate of the block that was entered
- * @param z - The z coordinate of the block that was entered
- * @param blockName - The name of the block that was entered
- */
-declare var onBlockStandStart: (playerId: PlayerId, x: number, y: number, z: number, blockName: BlockName) => void
-
-/**
- * Called when a player leaves a block.
- * @param playerId - The id of the player that left the block
- * @param x - The x coordinate of the block that was left
- * @param y - The y coordinate of the block that was left
- * @param z - The z coordinate of the block that was left
- * @param blockName - The name of the block that was left
- */
-declare var onBlockStandStop: (playerId: PlayerId, x: number, y: number, z: number, blockName: BlockName) => void
-
-/**
- * Called when a player attempts to craft an item
- * Return "preventCraft" to prevent a craft from happening
- * @param playerId - The id of the player that is attempting to craft the item
- * @param itemName - The name of the item that is being crafted
- * @param craftingIdx - The index of the used recipe in the item's recipe list
- * @param craftTimes - The number of times the craft recipe is used at once (e.g. shift held while crafting)
- */
-declare var onPlayerAttemptCraft: (playerId: PlayerId, itemName: string, craftingIdx: number, craftTimes: number) => void | "preventCraft"
-
-/**
- * Called when a player crafts an item
- * @param playerId - The id of the player that crafted the item
- * @param itemName - The name of the item that was crafted
- * @param craftingIdx - The index of the used recipe in the item's recipe list
- * @param recipe - The recipe that was used to craft the item
- * @param craftTimes - The number of times the craft recipe is used at once (e.g. shift held while crafting)
- */
-declare var onPlayerCraft: (playerId: PlayerId, itemName: string, craftingIdx: number, recipe: RecipesForItem[number], craftTimes: number) => void
-
-/**
- * Called when a player attempts to open a chest
- * Return "preventOpen" to prevent the player from opening the chest
- */
-declare var onPlayerAttemptOpenChest: (playerId: PlayerId, x: number, y: number, z: number, isMoonstoneChest: boolean, isIronChest: boolean) => void | "preventOpen"
-
-/**
- * Called when a player opens a chest
- */
-declare var onPlayerOpenedChest: (playerId: PlayerId, x: number, y: number, z: number, isMoonstoneChest: boolean, isIronChest: boolean) => void
-
-/**
- * Called when a player moves an item out of their inventory
- * Return "preventChange" to prevent the movement
- */
-declare var onPlayerMoveItemOutOfInventory: (playerId: PlayerId, itemName: string, itemAmount: number, fromIdx: number, movementType: string) => void | "preventChange"
-
-/**
- * Called for all types of inventory item movement.
- * Certain methods of moving item can result in splitting a stack
- * into multiple slots. (e.g. shift-click).
- * toStartIdx and toEndIdx provide the min and max idxs moved into.
- * Return "preventChange" to prevent item movement.
- */
-declare var onPlayerMoveInvenItem: (playerId: PlayerId, fromIdx: number, toStartIdx: number, toEndIdx: number, amt: number) => void | "preventChange"
-
-/**
- * Called when a player moves an item into an index within a range of inventory slots
- * Return "preventChange" to prevent the movement
- */
-declare var onPlayerMoveItemIntoIdxs: (playerId: PlayerId, start: number, end: number, moveIdx: number, itemAmount: number) => void | "preventChange"
-
-/**
- * Return "preventChange" to prevent the swap
- * @param playerId - The id of the player swapping the inventory slots
- * @param i - The index of the first slot
- * @param j - The index of the second slot
- */
-declare var onPlayerSwapInvenSlots: (playerId: PlayerId, i: number, j: number) => void | "preventChange"
-
-/**
- * Return "preventChange" to prevent the movement
- * @param playerId - The id of the player moving the item
- * @param i - The index of the first slot
- * @param j - The index of the second slot
- * @param amt - The amount of the item being moved
- */
-declare var onPlayerMoveInvenItemWithAmt: (playerId: PlayerId, i: number, j: number, amt: number) => void | "preventChange"
-
-/**
- * Called when player alt actions (right click on pc).
- * The co-ordinates will be undefined if there is no targeted block (and block will be "Air")
- * Some actions can be prevented by returning "preventAction",
- * but this may not work as well for certain actions which the game client predicts to succeed -
- * test it to see if it works for your use case, feel free to report any broken ones.
- */
-declare var onPlayerAttemptAltAction: (playerId: PlayerId, x: number, y: number, z: number, block: BlockName, targetEId: EntityId | null) => void | "preventAction"
-
-/**
- * Called when player completes an alt action (right click on pc).
- * The co-ordinates will be undefined if there is no targeted block (and block will be "Air")
- */
-declare var onPlayerAltAction: (playerId: PlayerId, x: number, y: number, z: number, block: BlockName, targetEId: EntityId | null) => void
-
-/**
- * Called when a player clicks
- * Don't have important functionality depending on wasAltClick,
- * as it'll always be false for touchscreen players.
- */
-declare var onPlayerClick: (playerId: PlayerId, wasAltClick: boolean, x: number, y: number, z: number, block: BlockName, targetEId: EntityId | null) => void
-
-/**
- * Called when a player releases a click (mouse-up on desktop, touch-end on mobile).
- * Fires for both primary and secondary click releases.
- * Keep in mind wasAltClick will always be false for touchscreen players.
- */
-declare var onPlayerClickUp: (playerId: PlayerId, wasAltClick: boolean, x: number, y: number, z: number, block: BlockName, targetEId: EntityId | null) => void
-
-/**
- * Called when a client option is updated
- * @param playerId - The id of the player whose option was updated
- * @param option - The option that was updated
- * @param value - The new value of the option, always null for custom code
- */
-declare var onClientOptionUpdated: (playerId: PlayerId, option: ClientOption, value: any) => void
-
-/**
- * Called when a mob setting is updated
- * @param mobId - The id of the mob whose setting was updated
- * @param setting - The setting that was updated
- * @param value - The new value of the setting
- */
-declare var onMobSettingUpdated: (mobId: MobId, setting: MobSetting, value: any) => void
-
-/**
- * Called when a player's inventory is updated
- * @param playerId - The id of the player whose inventory was updated
- */
-declare var onInventoryUpdated: (playerId: PlayerId) => void
-
-/**
- * Called when a chest is updated by a player
- * x, y, z, will be null if isMoonstoneChest is true
- */
-declare var onChestUpdated: (initiatorEId: PlayerId, isMoonstoneChest: boolean, x: number | null, y: number | null, z: number | null) => void
-
-/**
- * Called when a block is changed in the world
- * initiatorDbId is null if updated by game code e.g. when a sapling grows
- * Return "preventChange" to prevent change
- * Return "preventDrop" to prevent a block item from dropping
- */
-declare var onWorldChangeBlock: (x: number, y: number, z: number, fromBlock: BlockName, toBlock: BlockName, initiatorDbId: string | null, extraInfo: WorldBlockChangedInfo) => void | "preventChange" | "preventDrop"
-
-/**
- * Called when a mesh entity is created
- * @param eId - The id of the mesh entity
- * @param type - The type of mesh entity
- * @param initiatorId - The id of the entity that created the mesh entity, if any
- */
-declare var onCreateBloxdMeshEntity: (eId: EntityId, type: string, initiatorId: EntityId | null) => void
-
-/**
- * Called when a entity collides with another entity
- * @param eId - The id of the entity
- * @param otherEId - The id of the other entity
- */
-declare var onEntityCollision: (eId: EntityId, otherEId: EntityId) => void
-
-/**
- * Called when a player attempts to spawn a mob, e.g. using a spawn orb.
- * Return "preventSpawn" to prevent the mob from spawning.
- */
-declare var onPlayerAttemptSpawnMob: (playerId: PlayerId, mobType: MobType, x: number, y: number, z: number) => void | "preventSpawn"
-
-/**
- * Called when the world attempts to spawn a mob.
- * Return "preventSpawn" to prevent the mob from spawning.
- * @param mobType - The type of mob
- * @param x - The potential x coordinate of the mob
- * @param y - The potential y coordinate of the mob
- * @param z - The potential z coordinate of the mob
- */
-declare var onWorldAttemptSpawnMob: (mobType: MobType, x: number, y: number, z: number) => void | "preventSpawn"
-
-/**
- * Called when a mob is spawned by a player
- */
-declare var onPlayerSpawnMob: (playerId: PlayerId, mobId: MobId, mobType: MobType, x: number, y: number, z: number, mobHerdId: MobHerdId, playSoundOnSpawn: boolean) => void
-
-/**
- * Called when a mob is spawned by the world
- */
-declare var onWorldSpawnMob: (mobId: MobId, mobType: MobType, x: number, y: number, z: number, mobHerdId: MobHerdId, playSoundOnSpawn: boolean) => void
-
-/**
- * Called when a mob is despawned by the world.
- * Return "preventDespawn" to prevent the mob from despawning.
- * @param mobId - The id of the mob despawned
- */
-declare var onWorldAttemptDespawnMob: (mobId: MobId) => void | "preventDespawn"
-
-/**
- * Called when a mob is despawned
- * @param mobId - The id of the mob despawned
- */
-declare var onMobDespawned: (mobId: MobId) => void
-
-/**
- * Called when a player attacks another player
- * @param playerId - The id of the player attacking
- */
-declare var onPlayerAttack: (playerId: string) => void
-
-/**
- * Called when a player is damaging another player
- * Return "preventDamage" to prevent damage
- * Return number to change damage dealt to that amount
- * Sometimes the damager will have left the game (e.g. spikes placer);
- * in this case, attackingPlayer will be the damagedPlayer,
- * but we pass damagerDbId for use cases where it's important.
- */
-declare var onPlayerDamagingOtherPlayer: (attackingPlayer: PlayerId, damagedPlayer: PlayerId, damageDealt: number, withItem: string, bodyPartHit: LifeformBodyPart, damagerDbId: PlayerDbId) => number | void | "preventDamage"
-
-/**
- * Called when a player is damaging a mob
- * Return "preventDamage" to prevent damage
- * Return number to change damage dealt to that amount
- */
-declare var onPlayerDamagingMob: (playerId: PlayerId, mobId: MobId, damageDealt: number, withItem: string, damagerDbId: PlayerDbId) => number | void | "preventDamage"
-
-/**
- * Called when a mob is damaging a player
- * Return "preventDamage" to prevent damage
- * Return number to change damage dealt to that amount
- * @param attackingMob the id of the mob damaging the player
- * @param damagedPlayer the id of the player being damaged
- * @param damageDealt the amount of damage dealt
- * @param withItem the item used to attack
- */
-declare var onMobDamagingPlayer: (attackingMob: MobId, damagedPlayer: PlayerId, damageDealt: number, withItem: string) => number | void | "preventDamage"
-
-/**
- * Called when a mob is damaging another mob
- * Return "preventDamage" to prevent damage
- * Return number to change damage dealt to that amount
- * @param attackingMob the id of the mob attacking
- * @param damagedMob the id of the mob being damaged
- * @param damageDealt the amount of damage dealt
- * @param withItem the item used to attack
- */
-declare var onMobDamagingOtherMob: (attackingMob: MobId, damagedMob: MobId, damageDealt: number, withItem: string) => number | void | "preventDamage"
-
-/**
- * Called when a player is about to be killed
- * Return "preventDeath" to prevent the player from being killed
- * @param killedPlayer - The id of the player being killed
- * @param attackingLifeform - The optional id of the lifeform attacking the player
- */
-declare var onAttemptKillPlayer: (killedPlayer: PlayerId, attackingLifeform?: LifeformId) => void | "preventDeath"
-
-/**
- * Called when a player kills another player
- * Return "keepInventory" to not drop the player's inventory
- * @param attackingPlayer - The id of the player attacking
- * @param killedPlayer - The id of the player killed
- * @param damageDealt - The amount of damage dealt
- * @param withItem - The item used to attack
- */
-declare var onPlayerKilledOtherPlayer: (attackingPlayer: string, killedPlayer: string, damageDealt: number, withItem: string) => void | "keepInventory"
-
-/**
- * Called when a mob kills a player
- * Return "keepInventory" to not drop the player's inventory
- * @param attackingMob - The id of the mob attacking
- * @param killedPlayer - The id of the player killed
- * @param damageDealt - The amount of damage dealt
- * @param withItem - The item used to attack
- */
-declare var onMobKilledPlayer: (attackingMob: any, killedPlayer: any, damageDealt: any, withItem: any) => void | "keepInventory"
-
-/**
- * Called when a player kills a mob
- * Return "preventDrop" to prevent the mob from dropping items
- */
-declare var onPlayerKilledMob: (playerId: PlayerId, mobId: MobId, damageDealt: number, withItem: string) => void | "preventDrop"
-
-/**
- * Called when a mob kills another mob
- * Return "preventDrop" to prevent the mob from dropping items
- * @param attackingMob - The id of the mob attacking
- * @param killedMob - The id of the mob killed
- * @param damageDealt - The amount of damage dealt
- * @param withItem - The item used to attack
- */
-declare var onMobKilledOtherMob: (attackingMob: MobId, killedMob: MobId, damageDealt: number, withItem: string) => void | "preventDrop"
-
-/**
- * Called when a player is affected by a new potion effect
- * @param initiatorId - The id of the player who initiated the potion effect
- * @param targetId - The id of the player who has started being affected
- * @param effectName - The name of the potion effect
- */
-declare var onPlayerPotionEffect: (initiatorId: string, targetId: string, effectName: "Damage" | "Speed" | "Damage Reduction" | "Invisible" | "Jump Boost" | "Knockback" | "Poisoned" | "Slowness" | "Weakness" | "Cleansed" | "Instant Damage" | "Health Regen" | "Instant Health" | "Haste" | "Shield" | "Double Jump" | "Heat Resistance" | "Thief" | "X-Ray Vision" | "Mining Yield" | "Brain Rot" | "Aura" | "Wall Climbing" | "Air Walk" | "Pickpocketer" | "Lifesteal" | "Bounciness" | "Blindness" | "Poopy" | "Glowing" | "Night Vision") => void | "preventEffect"
-
-/**
- * Called when a player is damaging a mesh entity
- */
-declare var onPlayerDamagingMeshEntity: (playerId: PlayerId, damagedId: EntityId, damageDealt: number, withItem: string) => void
-
-/**
- * Called when a player breaks a mesh entity
- * @param playerId - The id of the player breaking the mesh entity
- * @param entityId - The id of the mesh entity being broken
- */
-declare var onPlayerBreakMeshEntity: (playerId: PlayerId, entityId: EntityId) => void
-
-/**
- * Called when a player uses a throwable item
- */
-declare var onPlayerUsedThrowable: (playerId: PlayerId, throwableName: ThrowableItem, thrownEntityId: EntityId) => void
-
-/**
- * Called when a player's thrown projectile hits the terrain
- */
-declare var onPlayerThrowableHitTerrain: (playerId: PlayerId, throwableName: ThrowableItem, thrownEntityId: EntityId) => void
-
-/**
- * Set client option `touchscreenActionButton` to take effect
- * Called when a player presses the touchscreen action button
- * Called for both touchDown and touchUp
- * @param playerId - The id of the player pressing the touchscreen action button
- * @param touchDown - Whether the touchscreen action button was pressed or released
- */
-declare var onTouchscreenActionButton: (playerId: PlayerId, touchDown: boolean) => void
-
-/**
- * Called when a player claims a task
- * @param playerId - The id of the player claiming the task
- * @param taskId - The id of the task being claimed
- * @param isPromoTask - Whether the task is a promo task
- * @param claimedRewards - The rewards claimed by the player
- */
-declare var onTaskClaimed: (playerId: string, taskId: any, isPromoTask: any, claimedRewards: any) => any
-
-/**
- * Called when a chunk is first loaded
- * API Methods that modify the chunk like setBlock cannot be used here to make
- * persisted changes, and will introduce client-server desync most cases,
- * but might have some creative uses if you know what you're doing.
- * For most use cases, consider using another callback e.g. tick.
- * @param chunkId - The id of the chunk being loaded
- * @param chunk - The chunk being loaded, which can be modified by this callback
- * For world code callbacks this value will always be null.
- * @param wasPersistedChunk - Whether the chunk was persisted
- */
-declare var onChunkLoaded: (chunkId: string, chunk: LoadedChunk, wasPersistedChunk: boolean) => void
-
-/**
- * Called when a player requests a chunk
- */
-declare var onPlayerRequestChunk: (playerId: PlayerId, chunkX: number, chunkY: number, chunkZ: number, chunkId: string) => void
-
-/**
- * Called when an item drop is created
- */
-declare var onItemDropCreated: (itemEId: EntityId, itemName: string, itemAmount: number, x: number, y: number, z: number) => void
-
-/**
- * Called when a player starts charging an item
- * @param playerId - The id of the player charging the item
- * @param itemName - The name of the item being charged
- */
-declare var onPlayerStartChargingItem: (playerId: PlayerId, itemName: string) => void | "preventCharge"
-
-/**
- * Called when a player finishes charging an item
- */
-declare var onPlayerFinishChargingItem: (playerId: PlayerId, used: boolean, itemName: string, duration: number) => void
-
-
-declare var onPlayerFinishQTE: (playerId: PlayerId, qteId: QTERequestId, result: boolean) => void
-
-/**
- * Called when a player opens or closes the shop menu
- * @param playerId - The id of the player whose shop menu changed
- * @param isOpen - Whether the shop menu is now open
- */
-declare var onPlayerToggledShopMenu: (playerId: PlayerId, isOpen: boolean) => void
-
-/** Called after a player plays an emote from the emote wheel. */
-declare var onPlayerPlayedEmote: (playerId: PlayerId, emoteId: string) => void
-
-/**
- * Called when a player enters a vehicle
- * @param playerId - The id of the player that entered the vehicle
- * @param vehicleType - The type of the vehicle
- * @param vehicleEId - The id of the vehicle
- */
-declare var onPlayerEnteredVehicle: (playerId: PlayerId, vehicleType: MeshEntityVehicleType, vehicleEId: EntityId) => void
-
-/**
- * Called when a player exits a vehicle
- * @param playerId - The id of the player that exited the vehicle
- * @param vehicleType - The type of the vehicle
- * @param vehicleEId - The id of the vehicle
- */
-declare var onPlayerExitedVehicle: (playerId: PlayerId, vehicleType: MeshEntityVehicleType, vehicleEId: EntityId) => void
-
-/**
- * Called after a player successfully buys a shop item
- * @param playerId - The id of the player that bought the item
- * @param categoryKey - The shop category key
- * @param itemKey - The shop item key
- * @param item - The resolved shop item (with per-player overrides applied, internal properties stripped)
- * @param userInput - The user input provided, if the item has a userInput config
- */
-declare var onPlayerBoughtShopItem: (playerId: PlayerId, categoryKey: ShopCategoryKey, itemKey: ShopItemKey, item: BoughtShopItem, userInput?: string) => void
-
-/**
- * Called when a player responds to a UI request.
- *
- * @param playerId - The id of the player responding to the UI request.
- * @param id - The id of the UI request.
- * @param response - The response to the UI request.
- */
-declare var onUiRequestResponded: (playerId: PlayerId, id: UiRequestId, response: boolean) => void
-
-/**
- * Called every so often.
- * You should save custom db values/s3 objects here.
- * Persisted items ARE saved on graceful shutdown (e.g. uncaught error, update, etc),
- * but this helps prevent large data-loss on non-graceful shutdowns.
- */
-declare var doPeriodicSave: () => void
+import type {
+	GameApi,
+	Console,
+	EntityId,
+	Pos,
+	LifeformId,
+	PlayerId,
+	PNull,
+	PlayerDbId,
+	LifeformBodyPart,
+	PlayerAttemptDamageOtherPlayerOpts,
+	HittingSoundOverride,
+	ItemName,
+	EnchantmentAttributes,
+	EnchantmentPerk,
+	EnchantmentTier,
+	CustomTextStyling,
+	TranslatedText,
+	EntityName,
+	Rank,
+	StyledIcon,
+	FontSize,
+	StyledText,
+	TextStyle,
+	ProgressBar,
+	StyledKeyBinding,
+	NoaAction,
+	ClientOption,
+	EarthSkyBox,
+	Vec3,
+	LobbyLeaderboardInfo,
+	TextWithDisplayOptions,
+	HeaderChip,
+	GunshotOrigin,
+	ShopCategoryKey,
+	ShopItemKey,
+	ShopItem,
+	ShopItemUserInput,
+	SchematicId,
+	ShopItemBadgeType,
+	ShopCategoryConfig,
+	OtherEntitySetting,
+	EntityMeshScalingMap,
+	EntityNamedNode,
+	PlayerMeshNamedNode,
+	LobbyLeaderboardValues,
+	ChatTags,
+	NameTagInfo,
+	RankInfo,
+	HealthbarInfo,
+	NameTagBorder,
+	HealthbarDisplay,
+	HealthbarColourGradient,
+	NameTagBorderStyle,
+	NameTagBorderTarget,
+	MultilineTextBox,
+	TempParticleSystemOpts,
+	ParticlePresetOpts,
+	ParticleSystemOpts,
+	VelocityGradient,
+	TimeColorGradient,
+	RandomColorGradient,
+	ParticlePresetId,
+	AnimationSchema,
+	BlockbenchAnimationSchema,
+	LoopModeSchema,
+	AnimationTimelineSchema,
+	KeyframeSchema,
+	LerpPointSchema,
+	Point,
+	LerpModeSchema,
+	BlockbenchLoopModeSchema,
+	BlockbenchAnimationTimelineSchema,
+	TimestampString,
+	BlockbenchAnimationFrameSchema,
+	BlockbenchLerpModeSchema,
+	NodeSkeletonAnimationSchema,
+	NodeName,
+	NodeAnimationSchema,
+	BlockbenchBonesAnimationSchema,
+	BlockbenchBoneAnimationSchema,
+	MobId,
+	MobDbId,
+	BlockName,
+	BlockId,
+	WorldBlockChangedInfo,
+	WorldBlockChangedCause,
+	GameChunk,
+	PersistedExtraInfo,
+	ItemAttributes,
+	ItemDropOptions,
+	AudioEntityOpts,
+	AnimParams,
+	HarvestType,
+	BlockMetadataModelType,
+	SpecialToolDrop,
+	RecursiveReadonly,
+	Primitive,
+	SoundType,
+	GunStatsOverride,
+	GunMetadata,
+	NonOverridableStats,
+	GunCategory,
+	WeaponComboInfo,
+	AnyMetadataItem,
+	CustomItemStat,
+	InvenItem,
+	RecipesForItem,
+	EntityType,
+	NetworkedEntityType,
+	LifeformType,
+	ThrowableItem,
+	MeshEntityType,
+	MeshEntityOptsStringified,
+	MeshEntityOpts,
+	CommonMeshEntityOpts,
+	BlockNameOrId,
+	Cosmetics,
+	PlayerPose,
+	MeshParticleSystemOpts,
+	CosmeticType,
+	CosmeticName,
+	MobHerdId,
+	MobType,
+	MobSpawnOpts,
+	MobVariation,
+	MobSetting,
+	MobSettings,
+	MobItemDrop,
+	MobBurstAttackInfo,
+	MobArmour,
+	MobWarpTargetSpecialAttackInfo,
+	MobCombatTetherCombatInfo,
+	MobEvadeInfo,
+	MobChargeSpecialAttackInfo,
+	MobTameInfo,
+	MobPetInfo,
+	MobHealthRegenSettings,
+	MobBridgeInfo,
+	MobSlideInfo,
+	MobJumpInfo,
+	MobRandomFacingInfo,
+	ArmourPart,
+	MobArmourPiece,
+	TempMobParticleOpts,
+	MobParticleOpts,
+	ItemNameWithEffects,
+	LevelUpBonuses,
+	EffectOpts,
+	PotionEffect,
+	MobFeedLevelUpLevels,
+	MobLevelUpBonus,
+	MobFeedLevel,
+	InclusiveRange,
+	Bounds,
+	MutableBounds,
+	MobAiState,
+	MobAiStateParams,
+	MobWorldView,
+	MeshEntityPhysicsOpts,
+	QTEType,
+	QTEClientParameters,
+	QTEParametersForType,
+	QTEDefinitions,
+	ProgressBarQteParams,
+	ProgressBarQteState,
+	TimedClickQteParams,
+	TimedClickQteState,
+	GravityBarQteParams,
+	GravityBarQteState,
+	PrecisionBarQteParams,
+	PrecisionBarQteState,
+	RhythmClickQteParams,
+	RhythmClickQteState,
+	QTERequestId,
+	UiRequestId,
+	IngameIconName,
+	InbuiltEffectInfo,
+	PlayerPhysicsState,
+	PhysicsTier,
+	PhysicsTiers,
+	AngleDir,
+	BlockRaycastResult,
+	MeshParticleSystemUpdates,
+	MeshParticleSystemUpdate,
+	UgcCurrencyInfo,
+	UserCallbacks,
+	WorldGamemode,
+	QueuedCommandId,
+	QueuedStatusString,
+	UiRequestClientParameters,
+	MultiBlockInfo,
+	MeshEntityVehicleType,
+	BoughtShopItem,
+	OnPlayerChatObjectResponse,
+	ChatMessageObject,
+	_TypeOf,
+	ItemMetaInfo,
+	BlockMetadataItem,
+	NonBlockMetadataItem,
+	LoadedChunk,
+	Song,
+	ParticleSystemBlendMode,
+	HalfblockPlacement,
+	WalkThroughType,
+	LobbyType,
+	PhysicsType,
+	BoatTier,
+	GliderTier,
+	BalloonTier,
+	SleepingTier,
+	CarTier,
+	ExplosionType,
+	ClientOptions,
+	OtherEntitySettings,
+} from "@bloxd"
+
+declare global {
+	/** The ID of the player running the code.
+	 *
+	 * Lobby code usually has nobody running it, so this is null.
+	 */
+	const myId: string | null
+	/** The position of the code block or press to code board */
+	const thisPos: [number, number, number]
+	/** The owner of the current custom lobby */
+	const lobbyOwnerId: string | null
+	const console: Console
+	/** Game API */
+	const api: GameApi
+
+	/**
+	 * Called every tick, 20 times per second
+	 * @param ms - The fixed timestep, can be used as "milliseconds since last tick"
+	 */
+	var tick: (ms: number) => void
+
+	/**
+	 * Called when the lobby is shutting down
+	 * @param serverIsShuttingDown - Whether the server is shutting down
+	 */
+	var onClose: (serverIsShuttingDown: boolean) => void
+
+	/**
+	 * Called when a player joins the lobby
+	 * @param playerId - The id of the player that joined
+	 * @param fromGameReset - Whether this call is from a game reset (used by SessionBasedGame)
+	 */
+	var onPlayerJoin: (playerId: string, fromGameReset: boolean) => void
+
+	/**
+	 * Called when a player leaves the lobby
+	 * @param playerId - The id of the player that left
+	 * @param serverIsShuttingDown - Whether the server is shutting down
+	 */
+	var onPlayerLeave: (playerId: string, serverIsShuttingDown: boolean) => void
+
+	/**
+	 * Called when a player jumps
+	 * @param playerId - The id of the player that jumped
+	 */
+	var onPlayerJump: (playerId: string) => void
+
+	/**
+	 * Called when a player requests to respawn.
+	 * Optionally return the respawn location. Defaults to [0, 0, 0].
+	 * Return true to handle yourself (good for async,
+	 * but be careful that the player isn't at the place they died,
+	 * as they could pick up their old items or hit the player they were fighting).
+	 * @param playerId - The id of the player that requested to respawn
+	 */
+	var onRespawnRequest: (playerId: string) => true | void | number[]
+
+	/**
+	 * Called when a player sends a command
+	 * @param playerId - The id of the player that sent the command
+	 * @param command - The command that the player sent
+	 */
+	var playerCommand: (playerId: string, command: string) => boolean
+
+	/**
+	 * Called when a player sends a chat message
+	 * Return false or null to prevent the broadcast of the message.
+	 * Return a string or CustomTextStyling to add a prefix to message.
+	 * Return for most flexibility: an object where keys are playerIds -
+	 * the value for a playerId being false means that player won't receive the message.
+	 * Otherwise playerId values should be an object with (optional) keys
+	 * prefixContent and chatContent to modify the prefix and the chat.
+	 * CustomTextStyling[] prefixContent is expected, e.g. [["prefix"]] or [[{ str: "prefix" }]].
+	 * World code is not permitted to specify chatContent, it will be ignored.
+	 * @param playerId - The id of the player that sent the message
+	 * @param chatMessage - The message that the player sent
+	 * @param channelName - The name of the channel that the message was sent in
+	 */
+	var onPlayerChat: (playerId: PlayerId, chatMessage: string, channelName?: string) => boolean | void | ChatTags | OnPlayerChatObjectResponse
+
+	/**
+	 * Called when a player changes a block
+	 * Return "preventChange" to prevent the change.
+	 * If player places block, fromBlock will be Air (and toBlock the block).
+	 * If a player breaks a block, toBlock will be Air.
+	 * Return "preventDrop" to prevent a block item from dropping.
+	 * Return an array to set the dropped item position.
+	 */
+	var onPlayerChangeBlock: (playerId: PlayerId, x: number, y: number, z: number, fromBlock: BlockName, toBlock: BlockName, droppedItem: BlockName | null, fromBlockInfo: MultiBlockInfo, toBlockInfo: MultiBlockInfo) => void | "preventChange" | "preventDrop" | [number, number, number]
+
+	/**
+	 * Called when a player drops an item
+	 * Return "preventDrop" to prevent the player from dropping the item at all.
+	 * Return "allowButNoDroppedItemCreated" to allow discarding items without dropping them.
+	 */
+	var onPlayerDropItem: (playerId: PlayerId, x: number, y: number, z: number, itemName: ItemName, itemAmount: number, fromIdx: number) => void | "preventDrop" | "allowButNoDroppedItemCreated"
+
+	/**
+	 * Called when a player picks up an item
+	 * @param playerId - The id of the player that picked up the item
+	 * @param itemName - The name of the item that was picked up
+	 * @param itemAmount - The amount of the item that was picked up
+	 * @param itemEntityId - The entityId of the item that was picked up
+	 */
+	var onPlayerPickedUpItem: (playerId: PlayerId, itemName: string, itemAmount: number, itemEntityId: EntityId) => void
+
+	/**
+	 * Called when a player selects a different inventory slot.
+	 * This will be called eventually when you have already set the slot using
+	 * api.setSelectedInventorySlotI so be careful not to cause an infinite loop doing this.
+	 * @param playerId - The id of the player that selected the inventory slot
+	 * @param slotIndex - The index of the inventory slot that was selected
+	 */
+	var onPlayerSelectInventorySlot: (playerId: PlayerId, slotIndex: number) => void
+
+	/**
+	 * Called when a player stands on a block
+	 * @param playerId - The id of the player that stood on the block
+	 * @param x - The x coordinate of the block that was stood on
+	 * @param y - The y coordinate of the block that was stood on
+	 * @param z - The z coordinate of the block that was stood on
+	 * @param blockName - The name of the block that was stood on
+	 */
+	var onBlockStand: (playerId: PlayerId, x: number, y: number, z: number, blockName: BlockName) => void
+
+	/**
+	 * Called when a player enters a block. Only called once per block until the player leaves the block.
+	 * @param playerId - The id of the player that entered the block
+	 * @param x - The x coordinate of the block that was entered
+	 * @param y - The y coordinate of the block that was entered
+	 * @param z - The z coordinate of the block that was entered
+	 * @param blockName - The name of the block that was entered
+	 */
+	var onBlockStandStart: (playerId: PlayerId, x: number, y: number, z: number, blockName: BlockName) => void
+
+	/**
+	 * Called when a player leaves a block.
+	 * @param playerId - The id of the player that left the block
+	 * @param x - The x coordinate of the block that was left
+	 * @param y - The y coordinate of the block that was left
+	 * @param z - The z coordinate of the block that was left
+	 * @param blockName - The name of the block that was left
+	 */
+	var onBlockStandStop: (playerId: PlayerId, x: number, y: number, z: number, blockName: BlockName) => void
+
+	/**
+	 * Called when a player attempts to craft an item
+	 * Return "preventCraft" to prevent a craft from happening
+	 * @param playerId - The id of the player that is attempting to craft the item
+	 * @param itemName - The name of the item that is being crafted
+	 * @param craftingIdx - The index of the used recipe in the item's recipe list
+	 * @param craftTimes - The number of times the craft recipe is used at once (e.g. shift held while crafting)
+	 */
+	var onPlayerAttemptCraft: (playerId: PlayerId, itemName: string, craftingIdx: number, craftTimes: number) => void | "preventCraft"
+
+	/**
+	 * Called when a player crafts an item
+	 * @param playerId - The id of the player that crafted the item
+	 * @param itemName - The name of the item that was crafted
+	 * @param craftingIdx - The index of the used recipe in the item's recipe list
+	 * @param recipe - The recipe that was used to craft the item
+	 * @param craftTimes - The number of times the craft recipe is used at once (e.g. shift held while crafting)
+	 */
+	var onPlayerCraft: (playerId: PlayerId, itemName: string, craftingIdx: number, recipe: RecipesForItem[number], craftTimes: number) => void
+
+	/**
+	 * Called when a player attempts to open a chest
+	 * Return "preventOpen" to prevent the player from opening the chest
+	 */
+	var onPlayerAttemptOpenChest: (playerId: PlayerId, x: number, y: number, z: number, isMoonstoneChest: boolean, isIronChest: boolean) => void | "preventOpen"
+
+	/**
+	 * Called when a player opens a chest
+	 */
+	var onPlayerOpenedChest: (playerId: PlayerId, x: number, y: number, z: number, isMoonstoneChest: boolean, isIronChest: boolean) => void
+
+	/**
+	 * Called when a player moves an item out of their inventory
+	 * Return "preventChange" to prevent the movement
+	 */
+	var onPlayerMoveItemOutOfInventory: (playerId: PlayerId, itemName: string, itemAmount: number, fromIdx: number, movementType: string) => void | "preventChange"
+
+	/**
+	 * Called for all types of inventory item movement.
+	 * Certain methods of moving item can result in splitting a stack
+	 * into multiple slots. (e.g. shift-click).
+	 * toStartIdx and toEndIdx provide the min and max idxs moved into.
+	 * Return "preventChange" to prevent item movement.
+	 */
+	var onPlayerMoveInvenItem: (playerId: PlayerId, fromIdx: number, toStartIdx: number, toEndIdx: number, amt: number) => void | "preventChange"
+
+	/**
+	 * Called when a player moves an item into an index within a range of inventory slots
+	 * Return "preventChange" to prevent the movement
+	 */
+	var onPlayerMoveItemIntoIdxs: (playerId: PlayerId, start: number, end: number, moveIdx: number, itemAmount: number) => void | "preventChange"
+
+	/**
+	 * Return "preventChange" to prevent the swap
+	 * @param playerId - The id of the player swapping the inventory slots
+	 * @param i - The index of the first slot
+	 * @param j - The index of the second slot
+	 */
+	var onPlayerSwapInvenSlots: (playerId: PlayerId, i: number, j: number) => void | "preventChange"
+
+	/**
+	 * Return "preventChange" to prevent the movement
+	 * @param playerId - The id of the player moving the item
+	 * @param i - The index of the first slot
+	 * @param j - The index of the second slot
+	 * @param amt - The amount of the item being moved
+	 */
+	var onPlayerMoveInvenItemWithAmt: (playerId: PlayerId, i: number, j: number, amt: number) => void | "preventChange"
+
+	/**
+	 * Called when player alt actions (right click on pc).
+	 * The co-ordinates will be undefined if there is no targeted block (and block will be "Air")
+	 * Some actions can be prevented by returning "preventAction",
+	 * but this may not work as well for certain actions which the game client predicts to succeed -
+	 * test it to see if it works for your use case, feel free to report any broken ones.
+	 */
+	var onPlayerAttemptAltAction: (playerId: PlayerId, x: number, y: number, z: number, block: BlockName, targetEId: EntityId | null) => void | "preventAction"
+
+	/**
+	 * Called when player completes an alt action (right click on pc).
+	 * The co-ordinates will be undefined if there is no targeted block (and block will be "Air")
+	 */
+	var onPlayerAltAction: (playerId: PlayerId, x: number, y: number, z: number, block: BlockName, targetEId: EntityId | null) => void
+
+	/**
+	 * Called when a player clicks
+	 * Don't have important functionality depending on wasAltClick,
+	 * as it'll always be false for touchscreen players.
+	 */
+	var onPlayerClick: (playerId: PlayerId, wasAltClick: boolean, x: number, y: number, z: number, block: BlockName, targetEId: EntityId | null) => void
+
+	/**
+	 * Called when a player releases a click (mouse-up on desktop, touch-end on mobile).
+	 * Fires for both primary and secondary click releases.
+	 * Keep in mind wasAltClick will always be false for touchscreen players.
+	 */
+	var onPlayerClickUp: (playerId: PlayerId, wasAltClick: boolean, x: number, y: number, z: number, block: BlockName, targetEId: EntityId | null) => void
+
+	/**
+	 * Called when a client option is updated
+	 * @param playerId - The id of the player whose option was updated
+	 * @param option - The option that was updated
+	 * @param value - The new value of the option, always null for custom code
+	 */
+	var onClientOptionUpdated: (playerId: PlayerId, option: ClientOption, value: any) => void
+
+	/**
+	 * Called when a mob setting is updated
+	 * @param mobId - The id of the mob whose setting was updated
+	 * @param setting - The setting that was updated
+	 * @param value - The new value of the setting
+	 */
+	var onMobSettingUpdated: (mobId: MobId, setting: MobSetting, value: any) => void
+
+	/**
+	 * Called when a player's inventory is updated
+	 * @param playerId - The id of the player whose inventory was updated
+	 */
+	var onInventoryUpdated: (playerId: PlayerId) => void
+
+	/**
+	 * Called when a chest is updated by a player
+	 * x, y, z, will be null if isMoonstoneChest is true
+	 */
+	var onChestUpdated: (initiatorEId: PlayerId, isMoonstoneChest: boolean, x: number | null, y: number | null, z: number | null) => void
+
+	/**
+	 * Called when a block is changed in the world
+	 * initiatorDbId is null if updated by game code e.g. when a sapling grows
+	 * Return "preventChange" to prevent change
+	 * Return "preventDrop" to prevent a block item from dropping
+	 */
+	var onWorldChangeBlock: (x: number, y: number, z: number, fromBlock: BlockName, toBlock: BlockName, initiatorDbId: string | null, extraInfo: WorldBlockChangedInfo) => void | "preventChange" | "preventDrop"
+
+	/**
+	 * Called when a mesh entity is created
+	 * @param eId - The id of the mesh entity
+	 * @param type - The type of mesh entity
+	 * @param initiatorId - The id of the entity that created the mesh entity, if any
+	 */
+	var onCreateBloxdMeshEntity: (eId: EntityId, type: string, initiatorId: EntityId | null) => void
+
+	/**
+	 * Called when a entity collides with another entity
+	 * @param eId - The id of the entity
+	 * @param otherEId - The id of the other entity
+	 */
+	var onEntityCollision: (eId: EntityId, otherEId: EntityId) => void
+
+	/**
+	 * Called when a player attempts to spawn a mob, e.g. using a spawn orb.
+	 * Return "preventSpawn" to prevent the mob from spawning.
+	 */
+	var onPlayerAttemptSpawnMob: (playerId: PlayerId, mobType: MobType, x: number, y: number, z: number) => void | "preventSpawn"
+
+	/**
+	 * Called when the world attempts to spawn a mob.
+	 * Return "preventSpawn" to prevent the mob from spawning.
+	 * @param mobType - The type of mob
+	 * @param x - The potential x coordinate of the mob
+	 * @param y - The potential y coordinate of the mob
+	 * @param z - The potential z coordinate of the mob
+	 */
+	var onWorldAttemptSpawnMob: (mobType: MobType, x: number, y: number, z: number) => void | "preventSpawn"
+
+	/**
+	 * Called when a mob is spawned by a player
+	 */
+	var onPlayerSpawnMob: (playerId: PlayerId, mobId: MobId, mobType: MobType, x: number, y: number, z: number, mobHerdId: MobHerdId, playSoundOnSpawn: boolean) => void
+
+	/**
+	 * Called when a mob is spawned by the world
+	 */
+	var onWorldSpawnMob: (mobId: MobId, mobType: MobType, x: number, y: number, z: number, mobHerdId: MobHerdId, playSoundOnSpawn: boolean) => void
+
+	/**
+	 * Called when a mob is despawned by the world.
+	 * Return "preventDespawn" to prevent the mob from despawning.
+	 * @param mobId - The id of the mob despawned
+	 */
+	var onWorldAttemptDespawnMob: (mobId: MobId) => void | "preventDespawn"
+
+	/**
+	 * Called when a mob is despawned
+	 * @param mobId - The id of the mob despawned
+	 */
+	var onMobDespawned: (mobId: MobId) => void
+
+	/**
+	 * Called when a player attacks another player
+	 * @param playerId - The id of the player attacking
+	 */
+	var onPlayerAttack: (playerId: string) => void
+
+	/**
+	 * Called when a player is damaging another player
+	 * Return "preventDamage" to prevent damage
+	 * Return number to change damage dealt to that amount
+	 * Sometimes the damager will have left the game (e.g. spikes placer);
+	 * in this case, attackingPlayer will be the damagedPlayer,
+	 * but we pass damagerDbId for use cases where it's important.
+	 */
+	var onPlayerDamagingOtherPlayer: (attackingPlayer: PlayerId, damagedPlayer: PlayerId, damageDealt: number, withItem: string, bodyPartHit: LifeformBodyPart, damagerDbId: PlayerDbId) => number | void | "preventDamage"
+
+	/**
+	 * Called when a player is damaging a mob
+	 * Return "preventDamage" to prevent damage
+	 * Return number to change damage dealt to that amount
+	 */
+	var onPlayerDamagingMob: (playerId: PlayerId, mobId: MobId, damageDealt: number, withItem: string, damagerDbId: PlayerDbId) => number | void | "preventDamage"
+
+	/**
+	 * Called when a mob is damaging a player
+	 * Return "preventDamage" to prevent damage
+	 * Return number to change damage dealt to that amount
+	 * @param attackingMob the id of the mob damaging the player
+	 * @param damagedPlayer the id of the player being damaged
+	 * @param damageDealt the amount of damage dealt
+	 * @param withItem the item used to attack
+	 */
+	var onMobDamagingPlayer: (attackingMob: MobId, damagedPlayer: PlayerId, damageDealt: number, withItem: string) => number | void | "preventDamage"
+
+	/**
+	 * Called when a mob is damaging another mob
+	 * Return "preventDamage" to prevent damage
+	 * Return number to change damage dealt to that amount
+	 * @param attackingMob the id of the mob attacking
+	 * @param damagedMob the id of the mob being damaged
+	 * @param damageDealt the amount of damage dealt
+	 * @param withItem the item used to attack
+	 */
+	var onMobDamagingOtherMob: (attackingMob: MobId, damagedMob: MobId, damageDealt: number, withItem: string) => number | void | "preventDamage"
+
+	/**
+	 * Called when a player is about to be killed
+	 * Return "preventDeath" to prevent the player from being killed
+	 * @param killedPlayer - The id of the player being killed
+	 * @param attackingLifeform - The optional id of the lifeform attacking the player
+	 */
+	var onAttemptKillPlayer: (killedPlayer: PlayerId, attackingLifeform?: LifeformId) => void | "preventDeath"
+
+	/**
+	 * Called when a player kills another player
+	 * Return "keepInventory" to not drop the player's inventory
+	 * @param attackingPlayer - The id of the player attacking
+	 * @param killedPlayer - The id of the player killed
+	 * @param damageDealt - The amount of damage dealt
+	 * @param withItem - The item used to attack
+	 */
+	var onPlayerKilledOtherPlayer: (attackingPlayer: string, killedPlayer: string, damageDealt: number, withItem: string) => void | "keepInventory"
+
+	/**
+	 * Called when a mob kills a player
+	 * Return "keepInventory" to not drop the player's inventory
+	 * @param attackingMob - The id of the mob attacking
+	 * @param killedPlayer - The id of the player killed
+	 * @param damageDealt - The amount of damage dealt
+	 * @param withItem - The item used to attack
+	 */
+	var onMobKilledPlayer: (attackingMob: any, killedPlayer: any, damageDealt: any, withItem: any) => void | "keepInventory"
+
+	/**
+	 * Called when a player kills a mob
+	 * Return "preventDrop" to prevent the mob from dropping items
+	 */
+	var onPlayerKilledMob: (playerId: PlayerId, mobId: MobId, damageDealt: number, withItem: string) => void | "preventDrop"
+
+	/**
+	 * Called when a mob kills another mob
+	 * Return "preventDrop" to prevent the mob from dropping items
+	 * @param attackingMob - The id of the mob attacking
+	 * @param killedMob - The id of the mob killed
+	 * @param damageDealt - The amount of damage dealt
+	 * @param withItem - The item used to attack
+	 */
+	var onMobKilledOtherMob: (attackingMob: MobId, killedMob: MobId, damageDealt: number, withItem: string) => void | "preventDrop"
+
+	/**
+	 * Called when a player is affected by a new potion effect
+	 * @param initiatorId - The id of the player who initiated the potion effect
+	 * @param targetId - The id of the player who has started being affected
+	 * @param effectName - The name of the potion effect
+	 */
+	var onPlayerPotionEffect: (initiatorId: string, targetId: string, effectName: "Damage" | "Speed" | "Damage Reduction" | "Invisible" | "Jump Boost" | "Knockback" | "Poisoned" | "Slowness" | "Weakness" | "Cleansed" | "Instant Damage" | "Health Regen" | "Instant Health" | "Haste" | "Shield" | "Double Jump" | "Heat Resistance" | "Thief" | "X-Ray Vision" | "Mining Yield" | "Brain Rot" | "Aura" | "Wall Climbing" | "Air Walk" | "Pickpocketer" | "Lifesteal" | "Bounciness" | "Blindness" | "Poopy" | "Glowing" | "Night Vision") => void | "preventEffect"
+
+	/**
+	 * Called when a player is damaging a mesh entity
+	 */
+	var onPlayerDamagingMeshEntity: (playerId: PlayerId, damagedId: EntityId, damageDealt: number, withItem: string) => void
+
+	/**
+	 * Called when a player breaks a mesh entity
+	 * @param playerId - The id of the player breaking the mesh entity
+	 * @param entityId - The id of the mesh entity being broken
+	 */
+	var onPlayerBreakMeshEntity: (playerId: PlayerId, entityId: EntityId) => void
+
+	/**
+	 * Called when a player uses a throwable item
+	 */
+	var onPlayerUsedThrowable: (playerId: PlayerId, throwableName: ThrowableItem, thrownEntityId: EntityId) => void
+
+	/**
+	 * Called when a player's thrown projectile hits the terrain
+	 */
+	var onPlayerThrowableHitTerrain: (playerId: PlayerId, throwableName: ThrowableItem, thrownEntityId: EntityId) => void
+
+	/**
+	 * Set client option `touchscreenActionButton` to take effect
+	 * Called when a player presses the touchscreen action button
+	 * Called for both touchDown and touchUp
+	 * @param playerId - The id of the player pressing the touchscreen action button
+	 * @param touchDown - Whether the touchscreen action button was pressed or released
+	 */
+	var onTouchscreenActionButton: (playerId: PlayerId, touchDown: boolean) => void
+
+	/**
+	 * Called when a player claims a task
+	 * @param playerId - The id of the player claiming the task
+	 * @param taskId - The id of the task being claimed
+	 * @param isPromoTask - Whether the task is a promo task
+	 * @param claimedRewards - The rewards claimed by the player
+	 */
+	var onTaskClaimed: (playerId: string, taskId: any, isPromoTask: any, claimedRewards: any) => any
+
+	/**
+	 * Called when a chunk is first loaded
+	 * API Methods that modify the chunk like setBlock cannot be used here to make
+	 * persisted changes, and will introduce client-server desync most cases,
+	 * but might have some creative uses if you know what you're doing.
+	 * For most use cases, consider using another callback e.g. tick.
+	 * @param chunkId - The id of the chunk being loaded
+	 * @param chunk - The chunk being loaded, which can be modified by this callback
+	 * For world code callbacks this value will always be null.
+	 * @param wasPersistedChunk - Whether the chunk was persisted
+	 */
+	var onChunkLoaded: (chunkId: string, chunk: LoadedChunk, wasPersistedChunk: boolean) => void
+
+	/**
+	 * Called when a player requests a chunk
+	 */
+	var onPlayerRequestChunk: (playerId: PlayerId, chunkX: number, chunkY: number, chunkZ: number, chunkId: string) => void
+
+	/**
+	 * Called when an item drop is created
+	 */
+	var onItemDropCreated: (itemEId: EntityId, itemName: string, itemAmount: number, x: number, y: number, z: number) => void
+
+	/**
+	 * Called when a player starts charging an item
+	 * @param playerId - The id of the player charging the item
+	 * @param itemName - The name of the item being charged
+	 */
+	var onPlayerStartChargingItem: (playerId: PlayerId, itemName: string) => void | "preventCharge"
+
+	/**
+	 * Called when a player finishes charging an item
+	 */
+	var onPlayerFinishChargingItem: (playerId: PlayerId, used: boolean, itemName: string, duration: number) => void
+
+	
+	var onPlayerFinishQTE: (playerId: PlayerId, qteId: QTERequestId, result: boolean) => void
+
+	/**
+	 * Called when a player opens or closes the shop menu
+	 * @param playerId - The id of the player whose shop menu changed
+	 * @param isOpen - Whether the shop menu is now open
+	 */
+	var onPlayerToggledShopMenu: (playerId: PlayerId, isOpen: boolean) => void
+
+	/** Called after a player plays an emote from the emote wheel. */
+	var onPlayerPlayedEmote: (playerId: PlayerId, emoteId: string) => void
+
+	/**
+	 * Called when a player enters a vehicle
+	 * @param playerId - The id of the player that entered the vehicle
+	 * @param vehicleType - The type of the vehicle
+	 * @param vehicleEId - The id of the vehicle
+	 */
+	var onPlayerEnteredVehicle: (playerId: PlayerId, vehicleType: MeshEntityVehicleType, vehicleEId: EntityId) => void
+
+	/**
+	 * Called when a player exits a vehicle
+	 * @param playerId - The id of the player that exited the vehicle
+	 * @param vehicleType - The type of the vehicle
+	 * @param vehicleEId - The id of the vehicle
+	 */
+	var onPlayerExitedVehicle: (playerId: PlayerId, vehicleType: MeshEntityVehicleType, vehicleEId: EntityId) => void
+
+	/**
+	 * Called after a player successfully buys a shop item
+	 * @param playerId - The id of the player that bought the item
+	 * @param categoryKey - The shop category key
+	 * @param itemKey - The shop item key
+	 * @param item - The resolved shop item (with per-player overrides applied, internal properties stripped)
+	 * @param userInput - The user input provided, if the item has a userInput config
+	 */
+	var onPlayerBoughtShopItem: (playerId: PlayerId, categoryKey: ShopCategoryKey, itemKey: ShopItemKey, item: BoughtShopItem, userInput?: string) => void
+
+	/**
+	 * Called when a player responds to a UI request.
+	 *
+	 * @param playerId - The id of the player responding to the UI request.
+	 * @param id - The id of the UI request.
+	 * @param response - The response to the UI request.
+	 */
+	var onUiRequestResponded: (playerId: PlayerId, id: UiRequestId, response: boolean) => void
+
+	/**
+	 * Called every so often.
+	 * You should save custom db values/s3 objects here.
+	 * Persisted items ARE saved on graceful shutdown (e.g. uncaught error, update, etc),
+	 * but this helps prevent large data-loss on non-graceful shutdowns.
+	 */
+	var doPeriodicSave: () => void
+
+	/** Load another world-code file by relative path (./ or ../).
+	 * Does not work at runtime - Code is bundled before being run.
+	 * index.js/index.ts cannot be required: they hold the callbacks the engine runs.
+	 * No typing is available for the required file — use `import` and `export` syntax for full typing support.
+	 */
+	function require(id: string): any
+}
+
+export {}
 
 interface Map<K, V> {
     clear(): void;
