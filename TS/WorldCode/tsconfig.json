@@ -1,0 +1,37 @@
+{
+	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": false,
+		"strict": false,
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"target": "ES2015",
+		"noEmit": true,
+		"noLib": true,
+		"skipLibCheck": true,
+		"baseUrl": ".",
+		"paths": {
+			"@bloxd": [
+				"./node_modules/@bloxd/index.d.ts"
+			],
+			"@plugins/debug": [
+				"./node_modules/@plugins/debug/index.d.ts"
+			],
+			"@plugins/helpers": [
+				"./node_modules/@plugins/helpers/index.d.ts"
+			],
+			"@plugins/sessionBasedGame": [
+				"./node_modules/@plugins/sessionBasedGame/index.d.ts"
+			]
+		}
+	},
+	"include": [
+		"./**/*.ts",
+		"./**/*.js",
+		"./**/*.d.ts"
+	],
+	"files": [
+		"node_modules/@bloxd/globals.d.ts",
+		"node_modules/@bloxd/lib.d.ts"
+	]
+}
